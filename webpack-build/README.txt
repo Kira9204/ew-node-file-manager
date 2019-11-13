@@ -1,0 +1,1 @@
+This folder is the public webpack build that you can either serve from node.js or nginx.
