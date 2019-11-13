@@ -1,0 +1,15 @@
+[Unit]
+Description=NodeJs Website
+After=network.target
+
+[Service]
+Environment=PORT=3001
+User=erik
+WorkingDirectory=/home/erik/node-servers/files.d3ff.se
+ExecStart=/usr/bin/node server/www.js >/dev/null 2>&1
+Restart=always
+RestartSec=1000ms
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target
