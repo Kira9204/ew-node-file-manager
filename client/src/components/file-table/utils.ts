@@ -71,6 +71,7 @@ export const getFAIcon = (
     case 'XLTX':
       return 'far fa-file-excel';
     case 'TXT':
+    case 'INI':
     case 'LOG':
     case 'CONF':
     case 'CF':
@@ -94,6 +95,13 @@ export const getFAIcon = (
     case 'JSON':
     case 'XML':
       return 'far fa-file-code';
+    case 'ISO':
+    case 'BIN':
+    case 'CUE':
+    case 'MDF':
+    case 'IMG':
+    case 'NRG':
+      return 'fas fa-compact-disc';
     default:
       return 'far fa-file';
   }
@@ -112,7 +120,7 @@ export const isText = (fileName: string) => {
   }
 
   const res = mimeTypes.lookup(fileName);
-  if (!res || res === 'application/octet-stream') {
+  if (!res || res === 'application/octet-stream' || res.includes('image')) {
     return false;
   }
   return res.startsWith('text/') || res.startsWith('application/');
@@ -223,8 +231,8 @@ export enum SORT_BY {
 export const SORT_BY_STORAGE_KEY = 'sort-by';
 export const sortFilePath = (
   currentSort: string,
-  filesData: Array<FileStatInfo>,
-  setFilesData: (obj: Array<FileStatInfo>) => void,
+  filesData: FileStatInfo[],
+  setFilesData: (obj: FileStatInfo[]) => void,
   setHasSortedFilePath: (val: boolean) => void
 ) => {
   let newFilesData = filesData.slice(0);

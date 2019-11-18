@@ -107,4 +107,14 @@ export const TableSelectedDownloadButton = styled(Button).attrs({
   size: 'sm'
 })`
   background: green !important;
+  border-color: green !important;
+`;
+
+export const TableUploadButton = styled(Button).attrs({
+  variant: 'success',
+  size: 'sm'
+})`
+  background: #a78adc !important;
+  border-color: #a78adc !important;
+  margin-left: 10px;
 `;

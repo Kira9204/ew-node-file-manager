@@ -17,16 +17,20 @@ import {
   TableRow,
   TableSelectedDownloadButton
 } from './styles';
-import TableHeadSortDirectionName from './components/TableHead/TableHeadSortDirectionName';
-import TableHeadSortDirectionKind from './components/TableHead/TableHeadSortDirectionKind';
-import TableHeadSortDirectionSize from './components/TableHead/TableHeadSortDirectionSize';
-import TableHeadSortDirectionModified from './components/TableHead/TableHeadSortDirectionModified';
-import TableColNameComponent from './components/Cols/TableColNameComponent';
-import LocationSegment from './components/TableHead/LocationSegment';
-import LocationOneUp from './components/TableHead/LocationOneUp';
+import TableHeadSortDirectionName from './components/table-head/TableHeadSortDirectionName';
+import TableHeadSortDirectionKind from './components/table-head/TableHeadSortDirectionKind';
+import TableHeadSortDirectionSize from './components/table-head/TableHeadSortDirectionSize';
+import TableHeadSortDirectionModified from './components/table-head/TableHeadSortDirectionModified';
+import TableColNameComponent from './components/cols/TableColNameComponent';
+import LocationSegment from './components/table-head/LocationSegment';
+import LocationOneUp from './components/table-head/LocationOneUp';
 import DiskStatsTable from './components/DiskStatsTable';
 import { generateZIPDownloadURL } from '../../service';
-import TableHeadFilesSelect from './components/TableHead/TableHeadFilesSelect';
+import TableHeadFilesSelect from './components/table-head/TableHeadFilesSelect';
+import LocationLocked from './components/table-head/LocationLocked';
+import LocationLockedClear from './components/table-head/LocationLockedClear';
+import DialogUploadFile from './components/dialogs/DialogUploadFile';
+import DialogDeleteFile from './components/dialogs/DialogDeleteFiles';
 
 interface Props {
   pathData: FileListDataResponse;
@@ -41,7 +45,7 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
   );
   const [hasSortedFilePath, setHasSortedFilePath] = React.useState(false);
   const [previewFileName, setPreviewFileName] = React.useState('');
-  const [selectedFiles, setSelectedFiles] = React.useState<Array<string>>([]);
+  const [selectedFiles, setSelectedFiles] = React.useState<string[]>([]);
   React.useEffect(() => {
     if (currentSort === 'null') {
       setCurrentSort(SORT_BY.KIND_ASC);
@@ -112,6 +116,10 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
               <LocationOneUp location={location} />
               &nbsp;&nbsp;&nbsp;&nbsp;
               <LocationSegment location={location} />
+              &nbsp;
+              <LocationLocked />
+              &nbsp;&nbsp;
+              <LocationLockedClear />
             </th>
             <th>Kind</th>
             <th>Size</th>
@@ -142,12 +150,23 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
         </tbody>
       </Table>
       <CenterDiv>
-        <LinkWhite href={generateZIPDownloadURL(location, selectedFiles)}>
+        <LinkWhite
+          href={
+            selectedFiles.length > 0
+              ? generateZIPDownloadURL(location, selectedFiles)
+              : '#'
+          }
+        >
           <TableSelectedDownloadButton>
             ZIP Download
             {selectedFiles.length > 0 ? ` (${selectedFiles.length})` : ''}
           </TableSelectedDownloadButton>
         </LinkWhite>
+        <DialogUploadFile />
+        <DialogDeleteFile
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+        />
       </CenterDiv>
       <DiskStatsTable pathData={pathData} />
     </div>

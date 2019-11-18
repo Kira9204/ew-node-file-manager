@@ -41,6 +41,16 @@ export const LoadingWarningIcon = styled.i.attrs({
   color: #ffc107;
 `;
 
+export const LoginIcon = styled.i.attrs({
+  className: 'fas fa-key'
+})`
+  font-size: 400%;
+  padding-bottom: 10px;
+  color: #ffc107;
+  margin-top: 10px;
+  margin-bottom: 10px;
+`;
+
 export const LinkSpan = styled.span`
   text-decoration: underline;
   color: #007bff;

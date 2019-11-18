@@ -1,5 +1,4 @@
 import path from 'path';
-import { PATH_PUBLIC_FILES } from '../app';
 import fs from 'fs';
 import getImageSize from 'image-size';
 import mimeTypes from 'mime-types';
@@ -11,6 +10,13 @@ import diskUsage from 'diskusage';
 import queryString from 'query-string';
 import archiver from 'archiver';
 import express from 'express';
+import {
+  AUTH_DIR,
+  AUTH_FILESTATS,
+  AUTH_MODIFY,
+  PATH_PUBLIC_FILES,
+  PATH_TMP_UPLOAD
+} from '../constants';
 
 interface FileListDataResponse {
   diskInfo: {
@@ -36,12 +42,107 @@ interface FileStatInfo {
  * Translate the request filepath to the File system filepath
  * @param paths
  */
-export const getJailTranslatePath = (...paths: string[]) => {
+const getJailTranslatePath = (...paths: string[]) => {
   const newPath = paths.reduce((a, b) => path.join(a, b), PATH_PUBLIC_FILES);
   if (!newPath.startsWith(PATH_PUBLIC_FILES)) {
     return null;
   }
   return newPath;
+};
+
+const verifyLoginAgainstHeaders = (
+  req: express.Request,
+  res: express.Response,
+  authObj: AUTH_DIR
+) => {
+  // check for basic auth header
+  if (
+    !req.headers.authorization ||
+    req.headers.authorization.indexOf('Basic ') === -1
+  ) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'Missing Authorization Header' })
+      .send();
+  }
+
+  // verify auth credentials
+  const base64Credentials = req.headers.authorization.split(' ')[1];
+  const credentials = Buffer.from(base64Credentials, 'base64').toString('utf8');
+  const [username, password] = credentials.split(':');
+  const validUser =
+    authObj.user.toLowerCase() === username.toLowerCase() &&
+    authObj.password === password;
+  if (!validUser) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'Invalid Authentication Credentials' })
+      .send();
+  }
+  return false;
+};
+
+const authCleanString = (str: string) => {
+  let cleanPath = str.trim().replace(/\.\./gm, '');
+  if (cleanPath.charAt(0) === '/') {
+    cleanPath = cleanPath.substring(1);
+  }
+  if (cleanPath.charAt(-1) === '/') {
+    cleanPath = cleanPath.substring(0, cleanPath.length - 1);
+  }
+
+  return cleanPath;
+};
+/**
+ * If this path is protected by BASIC AUTH, make sure that the client is authenticated against a set of paths+usernames+passwords
+ * @param req: The express request
+ * @param res: The express response
+ * @param location: Is this location jailed?
+ */
+const basicAuthFileStatFailed = (
+  req: express.Request,
+  res: express.Response,
+  location: string
+) => {
+  if (!AUTH_FILESTATS || AUTH_FILESTATS.length === 0) {
+    return false;
+  }
+
+  const cleanLocation = authCleanString(location);
+  let foundAuth = AUTH_FILESTATS.find((e) => {
+    return (
+      cleanLocation.startsWith(authCleanString(e.path)) ||
+      e.path === '' ||
+      e.path === '/'
+    );
+  });
+  if (!foundAuth) {
+    return false;
+  }
+  return verifyLoginAgainstHeaders(req, res, foundAuth);
+};
+
+const basicAuthFileModifyFailed = (
+  req: express.Request,
+  res: express.Response,
+  location: string
+) => {
+  if (!AUTH_MODIFY || AUTH_MODIFY.length === 0) {
+    return true;
+  }
+
+  const cleanLocation = authCleanString(location);
+  let foundAuth = AUTH_MODIFY.find((e) => {
+    return (
+      cleanLocation.startsWith(authCleanString(e.path)) ||
+      e.path === '' ||
+      e.path === '/'
+    );
+  });
+  if (!foundAuth) {
+    return true;
+  }
+  return verifyLoginAgainstHeaders(req, res, foundAuth);
 };
 
 /**
@@ -147,7 +248,6 @@ export const sendFile = (filePath: string, res: express.Response) => {
   const ps = new stream.PassThrough(); // <---- this makes a trick with stream error handling
   stream.pipeline(r, ps, (err) => {
     if (err) {
-      console.log(err);
       return res.sendStatus(400);
     }
   });
@@ -237,7 +337,7 @@ const generateImageFilePreview = (
     return sendFile(fsPath, res);
   }
 
-  const thumbsDir = path.normalize(PATH_PUBLIC_FILES + '/__generated_thumbs__');
+  const thumbsDir = path.normalize(PATH_TMP_UPLOAD + '/__generated_thumbs__');
   if (!fs.existsSync(thumbsDir)) {
     fs.mkdirSync(thumbsDir);
   }
@@ -245,7 +345,7 @@ const generateImageFilePreview = (
   const ext = path.extname(fsPath);
   const fileHash = generateFileMD5(fsPath);
   const fileHashPath = path.normalize(
-    PATH_PUBLIC_FILES +
+    PATH_TMP_UPLOAD +
       '/__generated_thumbs__' +
       '/' +
       fileHash +
@@ -338,6 +438,12 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
     return res
       .status(404)
       .json({ status: 404, message: 'The path provided does not exist' })
+      .send();
+  }
+  if (basicAuthFileStatFailed(req, res, requestPath)) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'Invalid Authentication Credentials' })
       .send();
   }
 
@@ -466,7 +572,7 @@ export const downloadGenerateZip = (
       .json({ status: 403, message: 'No filenames provided' })
       .send();
   }
-  const requestFileNames: Array<string> = !Array.isArray(queryObj.fileNames)
+  const requestFileNames: string[] = !Array.isArray(queryObj.fileNames)
     ? [queryObj.fileNames]
     : queryObj.fileNames;
 
@@ -477,7 +583,7 @@ export const downloadGenerateZip = (
       .json({ status: 403, message: 'Location is outside of jail' })
       .send();
   }
-  const fileStat = getFileStats(requestLocation);
+  const fileStat = getFileStats(fsPath);
   if (!fileStat) {
     return res
       .status(404)
@@ -485,7 +591,7 @@ export const downloadGenerateZip = (
       .send();
   }
 
-  const realFiles: Array<string> = [];
+  const realFiles: string[] = [];
   requestFileNames.forEach((fileName) => {
     const jailPath = getJailTranslatePath(requestLocation + '/' + fileName);
     if (!jailPath) {
@@ -526,7 +632,6 @@ export const downloadGenerateZip = (
     if (!getJailTranslatePath(filePath)) {
       return;
     }
-
     const fileStats = getFileStats(filePath);
     if (!fileStats) {
       return;
@@ -541,4 +646,128 @@ export const downloadGenerateZip = (
     }
   });
   zip.finalize();
+};
+
+export const uploadFile = (req: express.Request, res: express.Response) => {
+  const requestPath = req.params[0];
+  if (basicAuthFileModifyFailed(req, res, requestPath)) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'Invalid Authentication Credentials' })
+      .send();
+  }
+
+  const fsPath = getJailTranslatePath(requestPath);
+  if (!fsPath) {
+    return res
+      .status(403)
+      .json({ status: 403, message: 'You cannot upload files outside of jail' })
+      .send();
+  }
+
+  // @ts-ignore
+  const objectKeys = Object.keys(req.files);
+  const totalToMove = objectKeys.length;
+  let totalMoved = 0;
+
+  objectKeys.forEach((key: string) => {
+    // @ts-ignore
+    const file = req.files[key];
+    // @ts-ignore
+    file.mv(fsPath + '/' + file.name, () => {
+      totalMoved += 1;
+      if (totalMoved === totalToMove) {
+        res.status(201).send();
+      }
+    });
+  });
+};
+
+export const deleteFile = (req: express.Request, res: express.Response) => {
+  const queryObj = queryString.parse(req.params[0]);
+  const requestLocation = '' + queryObj.location;
+  if (!queryObj.fileNames || queryObj.fileNames.length < 1) {
+    return res
+      .status(403)
+      .json({ status: 403, message: 'No filenames provided' })
+      .send();
+  }
+  const requestFileNames: string[] = !Array.isArray(queryObj.fileNames)
+    ? [queryObj.fileNames]
+    : queryObj.fileNames;
+
+  if (basicAuthFileModifyFailed(req, res, requestLocation)) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'Invalid Authentication Credentials' })
+      .send();
+  }
+
+  const fsPath = getJailTranslatePath(requestLocation);
+  if (!fsPath) {
+    return res
+      .status(403)
+      .json({ status: 403, message: 'Location is outside of jail' })
+      .send();
+  }
+  const fileStat = getFileStats(fsPath);
+  if (!fileStat) {
+    return res
+      .status(404)
+      .json({ status: 404, message: 'Location does not exist' })
+      .send();
+  }
+
+  const realFiles: string[] = [];
+  requestFileNames.forEach((fileName) => {
+    const jailPath = getJailTranslatePath(requestLocation + '/' + fileName);
+    if (!jailPath) {
+      return;
+    }
+    const fileStat = getFileStats(jailPath);
+    if (!fileStat) {
+      return;
+    }
+    realFiles.push(jailPath);
+  });
+
+  if (realFiles.length !== requestFileNames.length) {
+    return res
+      .status(403)
+      .json({
+        status: 403,
+        message: 'Aborted due to fileName argument escaping jail'
+      })
+      .send();
+  }
+
+  let removedFiles = 0;
+  realFiles.forEach((filePath, i) => {
+    if (!getJailTranslatePath(filePath)) {
+      return;
+    }
+    const fileStats = getFileStats(filePath);
+    if (!fileStats) {
+      return;
+    }
+
+    if (fileStats.isFile()) {
+      try {
+        fs.unlinkSync(filePath);
+        removedFiles += 1;
+      } catch (e) {}
+    } else if (fileStats.isDirectory()) {
+      try {
+        fs.rmdirSync(filePath);
+        removedFiles += 1;
+      } catch (e) {}
+    }
+  });
+
+  if (removedFiles === realFiles.length) {
+    return res.json({ status: 200, message: '' });
+  }
+  return res
+    .status(500)
+    .json({ status: 500, message: 'Failed to remove a file or folder' });
 };

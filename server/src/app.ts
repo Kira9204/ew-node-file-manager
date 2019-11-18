@@ -1,12 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
+import fileUpload from 'express-fileupload';
 //import morgan from 'morgan';
 //Import routes
 import FileManagerRoutes from './routes/FileManagerRoutes';
 import { sendFile } from './services/FileManager';
-export const PATH_PUBLIC_FILES = path.join(__dirname, '../../public-files');
-export const PATH_WEBPACK_BUILD = path.join(__dirname, '../../webpack-build');
+import { PATH_TMP_UPLOAD, PATH_WEBPACK_BUILD } from './constants';
 
 const app = express();
 //debugging
@@ -18,6 +17,13 @@ app.use(cors());
 app.use(express.json());
 //Enabled extended url encodings
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: PATH_TMP_UPLOAD
+  })
+);
+
 //Apply Routers
 app.use('/api', FileManagerRoutes);
 

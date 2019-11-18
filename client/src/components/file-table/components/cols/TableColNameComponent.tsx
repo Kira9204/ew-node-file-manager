@@ -18,7 +18,10 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import styled from 'styled-components';
 import { manualPreviewState } from '../../index';
 
-const TableColNameIconCheckbox = styled.input.attrs({className: 'checkbox-inline', type: "checkbox"})`
+const TableColNameIconCheckbox = styled.input.attrs({
+  className: 'checkbox-inline',
+  type: 'checkbox'
+})`
   margin-right: 10px;
   position: relative;
   top: 7px;
@@ -93,8 +96,8 @@ const ToolTipVideo = styled.video.attrs({
 const TableColNameComponent: React.FC<{
   fileItem: FileStatInfo;
   setPreviewFileName: (s: string) => void;
-  selectedFiles: Array<string>;
-  setSelectedFiles: (arr: Array<string>) => void
+  selectedFiles: string[];
+  setSelectedFiles: (arr: string[]) => void;
 }> = ({ fileItem, setPreviewFileName, selectedFiles, setSelectedFiles }) => {
   const history = useHistory();
 
@@ -126,16 +129,19 @@ const TableColNameComponent: React.FC<{
   const createCheckbox = () => {
     const isChecked = selectedFiles.includes(fileItem.name);
     return (
-      <TableColNameIconCheckbox checked={isChecked} onClick={() => {
-        if (isChecked) {
-          const newArr = selectedFiles.filter(e => e !== fileItem.name);
-          setSelectedFiles(newArr);
-        } else {
-          const newArr = selectedFiles.slice(0);
-          newArr.push(fileItem.name);
-          setSelectedFiles(newArr);
-        }
-      }}/>
+      <TableColNameIconCheckbox
+        checked={isChecked}
+        onClick={() => {
+          if (isChecked) {
+            const newArr = selectedFiles.filter((e) => e !== fileItem.name);
+            setSelectedFiles(newArr);
+          } else {
+            const newArr = selectedFiles.slice(0);
+            newArr.push(fileItem.name);
+            setSelectedFiles(newArr);
+          }
+        }}
+      />
     );
   };
 
@@ -144,19 +150,19 @@ const TableColNameComponent: React.FC<{
       <TableColName>
         <>
           {createCheckbox()}
-        <LinkSpan
-          onClick={() => pushNewHistoryLocation(fileItem.path, history)}
-        >
-          <TableColNameIcon
-            className={getFAIcon(
-              fileItem.name,
-              fileItem.extension,
-              fileItem.isDirectory
-            )}
-          />
-          <TableColNameAlign>{fileItem.name}</TableColNameAlign>
-        </LinkSpan>
-          </>
+          <LinkSpan
+            onClick={() => pushNewHistoryLocation(fileItem.path, history)}
+          >
+            <TableColNameIcon
+              className={getFAIcon(
+                fileItem.name,
+                fileItem.extension,
+                fileItem.isDirectory
+              )}
+            />
+            <TableColNameAlign>{fileItem.name}</TableColNameAlign>
+          </LinkSpan>
+        </>
       </TableColName>
     );
   }
@@ -185,7 +191,8 @@ const TableColNameComponent: React.FC<{
                   {createCloseButton()}
                   <ToolTipImage
                     src={generatePreviewURL(
-                      fileItem.path + `?width=${previewHeight}&height=${previewHeight}`
+                      fileItem.path +
+                        `?width=${previewHeight}&height=${previewHeight}`
                     )}
                     alt={fileItem.name}
                     onClick={() => togglePreview()}
@@ -346,6 +353,7 @@ const TableColNameComponent: React.FC<{
   }
   return (
     <TableColName>
+      {createCheckbox()}
       <Link href={generateDownloadURL(fileItem.path)} target="_blank">
         <TableColNameIcon
           className={getFAIcon(

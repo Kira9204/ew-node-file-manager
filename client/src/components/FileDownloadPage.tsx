@@ -1,9 +1,9 @@
 import React from 'react';
-import { FileStatInfo } from '../../../reducer';
-import { generateDownloadURL } from '../../../service';
-import { ContentTop, LinkSpan } from '../../../styles';
-import { Link } from '../styles';
-import { formatFileSize, formatMTime } from '../utils';
+import { FileStatInfo } from '../reducer';
+import { generateDownloadURL } from '../service';
+import { ContentTop, LinkSpan } from '../styles';
+import { Link } from './file-table/styles';
+import { formatFileSize, formatMTime } from './file-table/utils';
 
 const FileDownloadPage: React.FC<{ file: FileStatInfo; history: any }> = ({
   file,

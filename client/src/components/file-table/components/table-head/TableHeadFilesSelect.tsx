@@ -12,8 +12,8 @@ const SelectAllTableHead = styled.span`
 
 const TableHeadFilesSelect: React.FC<{
   filesData: FileStatInfo[];
-  selectedFiles: Array<string>;
-  setSelectedFiles: (files: Array<string>) => void;
+  selectedFiles: string[];
+  setSelectedFiles: (files: string[]) => void;
 }> = ({ filesData, selectedFiles, setSelectedFiles }) => {
   if (filesData.length !== selectedFiles.length) {
     return (
