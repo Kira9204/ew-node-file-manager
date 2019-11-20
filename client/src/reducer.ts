@@ -26,22 +26,22 @@ export interface ApplicationState {
   pathData: null | FileListDataResponse;
   fsLocation: string;
   uploadDialog: {
-    isOpen: boolean,
-    selectedFiles: null | File[],
-    uploadPercent: number,
-    statusCode: number,
-    statusMessage: string,
-    userName: string,
-    password: string
-  },
+    isOpen: boolean;
+    selectedFiles: null | File[];
+    uploadPercent: number;
+    statusCode: number;
+    statusMessage: string;
+    userName: string;
+    password: string;
+  };
   deleteDialog: {
-    isOpen: boolean,
-    statusCode: number,
-    statusMessage: string,
-    userName: string,
-    password: string
-  },
-  selectedFiles: string[]
+    isOpen: boolean;
+    statusCode: number;
+    statusMessage: string;
+    userName: string;
+    password: string;
+  };
+  selectedFiles: string[];
 }
 
 export interface DispatchAction {
@@ -88,7 +88,7 @@ export const ACTION_TYPES = {
   SET_DELETE_DIALOG_USERNAME: 'SET_DELETE_DIALOG_USERNAME',
   SET_DELETE_DIALOG_PASSWORD: 'SET_DELETE_DIALOG_PASSWORD',
   SET_DELETE_DIALOG_ERROR: 'SET_DELETE_DIALOG_ERROR',
-  CLOSE_DELETE_DIALOG: 'CLOSE_DELETE_DIALOG',
+  CLOSE_DELETE_DIALOG: 'CLOSE_DELETE_DIALOG'
 };
 
 export const reducer = (state: ApplicationState, action: DispatchAction) => {
