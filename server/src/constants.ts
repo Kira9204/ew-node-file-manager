@@ -13,6 +13,10 @@ export interface AUTH_DIR {
   password: string;
 }
 
+// If you have a _LOT_ of large files you might want to disable this option.
+// This will remove the recursive lookup of folder sizes.
+export const SETTING_SHOULD_FILESTAT_FOLDERS = true;
+
 // Certain folders can require a BASIC AUTH in order to stat files.
 // The format is in the following format: [ {user: string, password: string, location: string}]
 // Sub-folders of the specified path will also require the same password

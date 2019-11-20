@@ -15,7 +15,8 @@ import {
   AUTH_FILESTATS,
   AUTH_MODIFY,
   PATH_PUBLIC_FILES,
-  PATH_TMP_UPLOAD
+  PATH_TMP_UPLOAD,
+  SETTING_SHOULD_FILESTAT_FOLDERS
 } from '../constants';
 
 interface FileListDataResponse {
@@ -456,6 +457,39 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
     return response;
   };
 
+  const getFilePath = (fileName: string) => {
+    return requestPath.slice(-1) === '/'
+      ? requestPath + fileName
+      : requestPath + '/' + fileName;
+  };
+  const getFileExtension = (fileName: string, fileStats: fs.Stats) => {
+    return (fileStats.isDirectory()
+      ? ''
+      : path.extname(fileName).length > 0
+      ? path.extname(fileName).substring(1)
+      : path.extname(fileName)
+    ).toUpperCase();
+  };
+  const getFileMeme = (fileName: string, fileStats: fs.Stats) => {
+    return fileStats.isDirectory() ? '' : '' + mimeTypes.lookup(fileName);
+  };
+  const getCanPreviewFile = (fileName: string, fileStats: fs.Stats) => {
+    return fileStats.isDirectory()
+      ? false
+      : isImage(fileName) || isText(fileName);
+  };
+  const getFileSize = (fileName: string, fileStats: fs.Stats) => {
+    if (fileStats.isDirectory()) {
+      if (SETTING_SHOULD_FILESTAT_FOLDERS) {
+        return getFolderFileSize(fsPath + '/' + fileName);
+      }
+      return 0;
+    }
+    return fileStats.size;
+  };
+  const getModifiedTime = (fileStats: fs.Stats) => {
+    return fileStats.mtime.getTime();
+  };
   const createFileStatsEntry = (
     filePath: string,
     fileName: string,
@@ -463,25 +497,13 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
   ) => {
     return {
       name: fileName,
-      path:
-        requestPath.slice(-1) === '/'
-          ? requestPath + fileName
-          : requestPath + '/' + fileName,
-      extension: (fileStats.isDirectory()
-        ? ''
-        : path.extname(fileName).length > 0
-        ? path.extname(fileName).substring(1)
-        : path.extname(fileName)
-      ).toUpperCase(),
-      mime: fileStats.isDirectory() ? '' : '' + mimeTypes.lookup(fileName),
-      canPreview: fileStats.isDirectory()
-        ? false
-        : isImage(fileName) || isText(fileName),
+      path: getFilePath(fileName),
+      extension: getFileExtension(fileName, fileStats),
+      mime: getFileMeme(fileName, fileStats),
+      canPreview: getCanPreviewFile(fileName, fileStats),
       isDirectory: fileStats.isDirectory(),
-      size: fileStats.isDirectory()
-        ? getFolderFileSize(fsPath + '/' + fileName)
-        : fileStats.size,
-      modifiedTimeUTC: fileStats.mtime.getTime()
+      size: getFileSize(fileName, fileStats),
+      modifiedTimeUTC: getModifiedTime(fileStats)
     };
   };
 
