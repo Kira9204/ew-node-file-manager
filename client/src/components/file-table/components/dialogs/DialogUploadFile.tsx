@@ -37,8 +37,8 @@ const UploadButton = styled(Button).attrs({
 
 const DialogUploadFile: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const userName = state.uploadDialog.userName;
+  const password = state.uploadDialog.password;
 
   return (
     <>
@@ -92,12 +92,15 @@ const DialogUploadFile: React.FC = () => {
                   id="loginUsername"
                   type="text"
                   placeholder="Username"
-                  value={username}
+                  value={userName}
                   onChange={(e: any) => {
-                    setUsername(e.target.value);
+                    dispatch({
+                      type: ACTION_TYPES.SET_UPLOAD_DIALOG_USERNAME,
+                      payload: e.target.value
+                    });
                   }}
-                  isInvalid={username.length === 0}
-                  isValid={username.length > 0}
+                  isInvalid={userName.length === 0}
+                  isValid={userName.length > 0}
                 />
               </Form.Group>
             </Form.Row>
@@ -109,7 +112,10 @@ const DialogUploadFile: React.FC = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e: any) => {
-                    setPassword(e.target.value);
+                    dispatch({
+                      type: ACTION_TYPES.SET_UPLOAD_DIALOG_PASSWORD,
+                      payload: e.target.value
+                    });
                   }}
                   isInvalid={password.length === 0}
                   isValid={password.length > 0}
@@ -129,20 +135,16 @@ const DialogUploadFile: React.FC = () => {
 
             <UploadButton
               onClick={() => {
-                if (!state.uploadDialog.selectedFiles) {
+                if (
+                  !state.uploadDialog.selectedFiles ||
+                  userName.length === 0 ||
+                  password.length === 0
+                ) {
                   return;
                 }
-                dispatch({
-                  type: ACTION_TYPES.SET_UPLOAD_DIALOG_STATUS,
-                  payload: {
-                    statusCode: 0,
-                    statusMessage: ''
-                  }
-                });
-
                 const config = {
                   auth: {
-                    username,
+                    username: userName,
                     password
                   },
                   onUploadProgress: (progressEvent: any) => {
@@ -166,8 +168,6 @@ const DialogUploadFile: React.FC = () => {
                 axios
                   .put(generateUploadURL(state.fsLocation), data, config)
                   .then((res) => {
-                    setUsername('');
-                    setPassword('');
                     loadPathData(state.fsLocation, dispatch);
                     dispatch({
                       type: ACTION_TYPES.CLOSE_UPLOAD_DIALOG
@@ -175,7 +175,7 @@ const DialogUploadFile: React.FC = () => {
                   })
                   .catch((err: AxiosError) => {
                     dispatch({
-                      type: ACTION_TYPES.SET_UPLOAD_DIALOG_STATUS,
+                      type: ACTION_TYPES.SET_UPLOAD_DIALOG_ERROR,
                       payload: {
                         statusCode: err.response ? err.response.status : -1,
                         statusMessage: 'Failed to upload file(s)!'

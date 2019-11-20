@@ -30,12 +30,16 @@ export interface ApplicationState {
     selectedFiles: null | File[],
     uploadPercent: number,
     statusCode: number,
-    statusMessage: string
+    statusMessage: string,
+    userName: string,
+    password: string
   },
   deleteDialog: {
     isOpen: boolean,
     statusCode: number,
-    statusMessage: string
+    statusMessage: string,
+    userName: string,
+    password: string
   },
   selectedFiles: string[]
 }
@@ -55,12 +59,16 @@ export const initialApplicationState: ApplicationState = {
     selectedFiles: null,
     uploadPercent: 0,
     statusCode: 0,
-    statusMessage: ''
+    statusMessage: '',
+    userName: '',
+    password: ''
   },
   deleteDialog: {
     isOpen: false,
     statusCode: 0,
-    statusMessage: ''
+    statusMessage: '',
+    userName: '',
+    password: ''
   },
   selectedFiles: []
 };
@@ -72,10 +80,14 @@ export const ACTION_TYPES = {
   OPEN_UPLOAD_DIALOG: 'OPEN_UPLOAD_DIALOG',
   SET_UPLOAD_DIALOG_FILES: 'SET_UPLOAD_DIALOG_FILES',
   SET_UPLOAD_DIALOG_PERCENT: 'SET_UPLOAD_DIALOG_PERCENT',
-  SET_UPLOAD_DIALOG_STATUS: 'SET_UPLOAD_DIALOG_STATUS',
+  SET_UPLOAD_DIALOG_USERNAME: 'SET_UPLOAD_DIALOG_USERNAME',
+  SET_UPLOAD_DIALOG_PASSWORD: 'SET_UPLOAD_DIALOG_PASSWORD',
+  SET_UPLOAD_DIALOG_ERROR: 'SET_UPLOAD_DIALOG_ERROR',
   CLOSE_UPLOAD_DIALOG: 'CLOSE_UPLOAD_DIALOG',
   OPEN_DELETE_DIALOG: 'OPEN_DELETE_DIALOG',
-  SET_DELETE_DIALOG_STATUS: 'SET_DELETE_DIALOG_STATUS',
+  SET_DELETE_DIALOG_USERNAME: 'SET_DELETE_DIALOG_USERNAME',
+  SET_DELETE_DIALOG_PASSWORD: 'SET_DELETE_DIALOG_PASSWORD',
+  SET_DELETE_DIALOG_ERROR: 'SET_DELETE_DIALOG_ERROR',
   CLOSE_DELETE_DIALOG: 'CLOSE_DELETE_DIALOG',
 };
 
@@ -105,7 +117,13 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
         ...state,
         uploadDialog: {
           ...state.uploadDialog,
-          isOpen: true
+          isOpen: true,
+          selectedFiles: null,
+          uploadPercent: 0,
+          statusCode: 0,
+          statusMessage: '',
+          userName: '',
+          password: ''
         }
       };
     case ACTION_TYPES.SET_UPLOAD_DIALOG_FILES:
@@ -125,11 +143,28 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           uploadPercent: action.payload
         }
       };
-    case ACTION_TYPES.SET_UPLOAD_DIALOG_STATUS:
+    case ACTION_TYPES.SET_UPLOAD_DIALOG_USERNAME:
       return {
         ...state,
         uploadDialog: {
           ...state.uploadDialog,
+          userName: action.payload
+        }
+      };
+    case ACTION_TYPES.SET_UPLOAD_DIALOG_PASSWORD:
+      return {
+        ...state,
+        uploadDialog: {
+          ...state.uploadDialog,
+          password: action.payload
+        }
+      };
+    case ACTION_TYPES.SET_UPLOAD_DIALOG_ERROR:
+      return {
+        ...state,
+        uploadDialog: {
+          ...state.uploadDialog,
+          uploadPercent: 0,
           statusCode: action.payload.statusCode,
           statusMessage: action.payload.statusMessage
         }
@@ -138,12 +173,13 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
       return {
         ...state,
         uploadDialog: {
-          ...state.uploadDialog,
           isOpen: false,
           selectedFiles: null,
           uploadPercent: 0,
           statusCode: 0,
-          statusMessage: ''
+          statusMessage: '',
+          userName: '',
+          password: ''
         }
       };
     case ACTION_TYPES.OPEN_DELETE_DIALOG:
@@ -151,10 +187,15 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
         ...state,
         deleteDialog: {
           ...state.deleteDialog,
-          isOpen: true
+          isOpen: true,
+          uploadPercent: 0,
+          statusCode: 0,
+          statusMessage: '',
+          userName: '',
+          password: ''
         }
       };
-    case ACTION_TYPES.SET_DELETE_DIALOG_STATUS:
+    case ACTION_TYPES.SET_DELETE_DIALOG_ERROR:
       return {
         ...state,
         deleteDialog: {
@@ -163,13 +204,32 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           statusMessage: action.payload.statusMessage
         }
       };
+    case ACTION_TYPES.SET_DELETE_DIALOG_USERNAME:
+      return {
+        ...state,
+        deleteDialog: {
+          ...state.deleteDialog,
+          userName: action.payload
+        }
+      };
+    case ACTION_TYPES.SET_DELETE_DIALOG_PASSWORD:
+      return {
+        ...state,
+        deleteDialog: {
+          ...state.deleteDialog,
+          password: action.payload
+        }
+      };
     case ACTION_TYPES.CLOSE_DELETE_DIALOG:
       return {
         ...state,
         deleteDialog: {
           isOpen: false,
+          uploadPercent: 0,
           statusCode: 0,
-          statusMessage: ''
+          statusMessage: '',
+          userName: '',
+          password: ''
         }
       };
     default:

@@ -39,8 +39,8 @@ const DialogDeleteFile: React.FC<{
   setSelectedFiles: (files: string[]) => void;
 }> = ({ selectedFiles, setSelectedFiles }) => {
   const { state, dispatch } = useRootReducerProvider();
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const userName = state.deleteDialog.userName;
+  const password = state.deleteDialog.password;
 
   return (
     <>
@@ -89,12 +89,15 @@ const DialogDeleteFile: React.FC<{
                   id="loginUsername"
                   type="text"
                   placeholder="Username"
-                  value={username}
+                  value={userName}
                   onChange={(e: any) => {
-                    setUsername(e.target.value);
+                    dispatch({
+                      type: ACTION_TYPES.SET_DELETE_DIALOG_USERNAME,
+                      payload: e.target.value
+                    });
                   }}
-                  isInvalid={username.length === 0}
-                  isValid={username.length > 0}
+                  isInvalid={userName.length === 0}
+                  isValid={userName.length > 0}
                 />
               </Form.Group>
             </Form.Row>
@@ -106,7 +109,10 @@ const DialogDeleteFile: React.FC<{
                   placeholder="Password"
                   value={password}
                   onChange={(e: any) => {
-                    setPassword(e.target.value);
+                    dispatch({
+                      type: ACTION_TYPES.SET_DELETE_DIALOG_PASSWORD,
+                      payload: e.target.value
+                    });
                   }}
                   isInvalid={password.length === 0}
                   isValid={password.length > 0}
@@ -116,16 +122,18 @@ const DialogDeleteFile: React.FC<{
 
             <DeleteButton
               onClick={() => {
+                if (userName.length === 0 || password.length === 0) {
+                  return;
+                }
+
                 axios
                   .delete(generateDeleteURL(state.fsLocation, selectedFiles), {
                     auth: {
-                      username,
+                      username: userName,
                       password
                     }
                   })
                   .then((res) => {
-                    setUsername('');
-                    setPassword('');
                     loadPathData(state.fsLocation, dispatch);
                     dispatch({
                       type: ACTION_TYPES.CLOSE_DELETE_DIALOG
@@ -134,7 +142,7 @@ const DialogDeleteFile: React.FC<{
                   })
                   .catch((err: AxiosError) => {
                     dispatch({
-                      type: ACTION_TYPES.SET_DELETE_DIALOG_STATUS,
+                      type: ACTION_TYPES.SET_DELETE_DIALOG_ERROR,
                       payload: {
                         statusCode: err.response ? err.response.status : -1,
                         statusMessage: 'Could not upload file(s)!'

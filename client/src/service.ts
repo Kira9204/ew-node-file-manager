@@ -9,12 +9,9 @@ export interface StoredAuth {
   password: string;
 }
 
-/*
 export const BASE_URL =
   window.location.protocol + '//' + window.location.hostname;
-
- */
-export const BASE_URL = 'http://localhost:3001';
+/*export const BASE_URL = 'http://localhost:3001';*/
 /*export const BASE_URL = 'https://files.d3ff.se';*/
 
 export const API_URL = BASE_URL + '/api';
@@ -111,5 +108,8 @@ export const generateUploadURL = (path: string) => {
 };
 
 export const generateDeleteURL = (location: string, fileNames: string[]) => {
-  return API_URL + cleanUrl('/delete/' + queryString.stringify({ location, fileNames }));
+  return (
+    API_URL +
+    cleanUrl('/delete/' + queryString.stringify({ location, fileNames }))
+  );
 };
