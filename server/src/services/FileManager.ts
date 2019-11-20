@@ -250,16 +250,16 @@ const isImage = (fileName: string) => {
  * Does this file resemble a text file?
  * @param fileName
  */
-const isText = (fileName: string) => {
-  if (['.cf', '.service'].includes(path.extname(fileName))) {
+export const isText = (fileName: string) => {
+  if (['.pdf', '.cf', '.service'].includes(path.extname(fileName))) {
     return true;
   }
 
   const res = mimeTypes.lookup(fileName);
-  if (!res || res === 'application/octet-stream') {
+  if (!res) {
     return false;
   }
-  return res.startsWith('text/') || res.startsWith('application/');
+  return res.startsWith('text/');
 };
 
 /**

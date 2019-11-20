@@ -102,6 +102,10 @@ export const getFAIcon = (
     case 'IMG':
     case 'NRG':
       return 'fas fa-compact-disc';
+    case 'ZIP':
+    case 'RAR':
+    case '7Z':
+      return 'far fa-file-archive';
     default:
       return 'far fa-file';
   }
@@ -115,15 +119,15 @@ export const isImage = (fileName: string) => {
   return res.startsWith('image/');
 };
 export const isText = (fileName: string) => {
-  if (['.cf', '.service'].includes(path.extname(fileName))) {
+  if (['.pdf', '.cf', '.service'].includes(path.extname(fileName))) {
     return true;
   }
 
   const res = mimeTypes.lookup(fileName);
-  if (!res || res === 'application/octet-stream' || res.includes('image')) {
+  if (!res) {
     return false;
   }
-  return res.startsWith('text/') || res.startsWith('application/');
+  return res.startsWith('text/');
 };
 export const isAudio = (fileName: string) => {
   const res = mimeTypes.lookup(fileName);
