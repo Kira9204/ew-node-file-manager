@@ -1,14 +1,10 @@
-import {
-  TableColNameAlign,
-  TableColNameIcon,
-  TableRow
-} from '../styles';
-import {formatFileSize, getFAIcon, getFoldersSizeNumbers} from '../utils';
+import { TableColNameAlign, TableColNameIcon, TableRow } from '../styles';
+import { formatFileSize, getFAIcon, getFoldersSizeNumbers } from '../utils';
 import React from 'react';
-import {FileListDataResponse} from "../../../reducer";
-import styled from "styled-components";
-import Table from "react-bootstrap/Table";
-import Progressbar from "react-bootstrap/ProgressBar";
+import { FileListDataResponse } from '../../../reducer';
+import styled from 'styled-components';
+import Table from 'react-bootstrap/Table';
+import Progressbar from 'react-bootstrap/ProgressBar';
 
 interface Props {
   pathData: FileListDataResponse;
@@ -37,7 +33,6 @@ const DiskStatsTableTotalContainer = styled.div`
   justify-content: center;
 `;
 
-
 const DiskStatsTable: React.FC<Props> = ({ pathData }) => {
   const sizeInfo = getFoldersSizeNumbers(pathData.files);
   const diskUsage = pathData.diskInfo.total - pathData.diskInfo.free;
@@ -53,15 +48,19 @@ const DiskStatsTable: React.FC<Props> = ({ pathData }) => {
           <td>
             <TableColNameIcon className={getFAIcon('', '', true)} />
             <TableColNameAlign>
-              &nbsp;&nbsp;&nbsp;Total: {sizeInfo.numFolders}. Size:{' '}
-              {formatFileSize(sizeInfo.sizeFolders)}
+              &nbsp;&nbsp;&nbsp;Total: {sizeInfo.numFolders}
+              {sizeInfo.sizeFolders !== 0 && (
+                <>.&nbsp;Size: {formatFileSize(sizeInfo.sizeFolders)}</>
+              )}
             </TableColNameAlign>
             <DiskStatsTableTDSpacer />
             <TableColNameIcon className={getFAIcon('', '', false)} />
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <TableColNameAlign>
-              Total: {sizeInfo.numFiles}. Size:{' '}
-              {formatFileSize(sizeInfo.sizeFiles)}
+              Total: {sizeInfo.numFiles}
+              {sizeInfo.sizeFiles !== 0 && (
+                <>.&nbsp;Size: {formatFileSize(sizeInfo.sizeFiles)}</>
+              )}
             </TableColNameAlign>
             <DiskStatsTableTDSpacer />
             <DiskStatsTableTotalContainer>
@@ -84,7 +83,7 @@ const DiskStatsTable: React.FC<Props> = ({ pathData }) => {
             <div>
               By Erik Welander (erik.welander@hotmail.com)
               <br />
-              Version: 0.1-2019-11-18
+              Version: 0.1-2019-11-21
             </div>
           </td>
         </TableRow>

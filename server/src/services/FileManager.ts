@@ -16,6 +16,7 @@ import {
   AUTH_MODIFY,
   PATH_PUBLIC_FILES,
   PATH_TMP_UPLOAD,
+  SETTING_IGNORE_NAMES,
   SETTING_SHOULD_FILESTAT_FOLDERS
 } from '../constants';
 
@@ -147,7 +148,7 @@ const basicAuthFileModifyFailed = (
 };
 
 /**
- * Loads metadata about a file or folder, returns null if the path cannot be read
+ * Loads metadata about a file, returns null if the path cannot be read
  * @param path
  */
 const getFileStats = (path: string) => {
@@ -159,15 +160,35 @@ const getFileStats = (path: string) => {
 };
 
 /**
+ * Loads metadata about a file, returns null if the path cannot be read
+ * @param path
+ */
+const getFolderFileStats = (path: string) => {
+  try {
+    return fs.readdirSync(path);
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
  * Recursively walks down all folders and returns a list of all files below the folder
  * @param dir
  */
 const walkRecursivelyDownFolder = (dir: string) => {
   let results: any = [];
-  const list = fs.readdirSync(dir);
+  const list = getFolderFileStats(dir);
+  if (!list) {
+    return results;
+  }
+
   list.forEach((file) => {
     file = path.normalize(dir + '/' + file);
-    const stat = fs.statSync(file);
+    const stat = getFileStats(file);
+    if (!stat) {
+      return;
+    }
+
     if (stat && stat.isDirectory()) {
       //Recurse into a subdirectory
       results = results.concat(walkRecursivelyDownFolder(file));
@@ -187,8 +208,10 @@ const getFolderFileSize = (dir: string) => {
   const filePaths = walkRecursivelyDownFolder(dir);
   let finalSize = 0;
   filePaths.forEach((filePath: string) => {
-    const stat = fs.statSync(filePath);
-    finalSize += stat.size;
+    const stat = getFileStats(filePath);
+    if (stat) {
+      finalSize += stat.size;
+    }
   });
   return finalSize;
 };
@@ -199,8 +222,8 @@ const getFolderFileSize = (dir: string) => {
  * Free
  * Total
  */
-const getDiskInfo = () => {
-  return diskUsage.checkSync(PATH_PUBLIC_FILES);
+const getDiskInfo = (filePath: string = PATH_PUBLIC_FILES) => {
+  return diskUsage.checkSync(filePath);
 };
 
 /**
@@ -512,9 +535,15 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
     const filesStats: FileStatInfo[] = [];
 
     fileNames.forEach((fileName) => {
+      if (SETTING_IGNORE_NAMES.includes(fileName)) {
+        return;
+      }
+
       const filePath = path.normalize(fsPath + '/' + fileName);
-      const fileStats = fs.statSync(filePath);
-      filesStats.push(createFileStatsEntry(filePath, fileName, fileStats));
+      const fileStats = getFileStats(filePath);
+      if (fileStats) {
+        filesStats.push(createFileStatsEntry(filePath, fileName, fileStats));
+      }
     });
     sortFileStatsByDirectory(filesStats);
     return res
@@ -523,7 +552,7 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
           status: 200,
           message: 'Success!',
           data: {
-            diskInfo: getDiskInfo(),
+            diskInfo: getDiskInfo(fsPath),
             files: filesStats
           }
         })
@@ -531,6 +560,21 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
       .send();
   } else if (fileStat.isFile()) {
     const fileName = path.basename(fsPath);
+    if (SETTING_IGNORE_NAMES.includes(fileName)) {
+      return res
+        .json(
+          formatResponse({
+            status: 200,
+            message: 'Success!',
+            data: {
+              diskInfo: getDiskInfo(),
+              files: []
+            }
+          })
+        )
+        .send();
+    }
+
     const data = [createFileStatsEntry(fsPath, fileName, fileStat)];
     return res
       .json(
@@ -538,7 +582,7 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
           status: 200,
           message: 'Success!',
           data: {
-            diskInfo: getDiskInfo(),
+            diskInfo: getDiskInfo(fsPath),
             files: data
           }
         })

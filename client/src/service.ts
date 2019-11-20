@@ -76,7 +76,7 @@ export const pushNewHistoryLocation = (location: string, history: History) => {
   if (location.charAt(0) !== '/') {
     location = '/' + location;
   }
-  history.push(location);
+  history.push(cleanUrl(location));
 };
 export const generateFileListingURL = (fileItemPath: string) => {
   return API_URL + cleanUrl('/path/' + fileItemPath);

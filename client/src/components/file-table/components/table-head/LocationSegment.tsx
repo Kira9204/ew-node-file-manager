@@ -1,8 +1,8 @@
-import React from "react";
-import { useHistory } from "react-router"
-import {LinkSpan} from "../../styles";
-import {pushNewHistoryLocation} from "../../../../service";
-
+import React from 'react';
+import { useHistory } from 'react-router';
+import { LinkSpan } from '../../styles';
+import { pushNewHistoryLocation } from '../../../../service';
+//            onClick={() => pushNewHistoryLocation(fileItem.path, history)}
 const LocationSegment: React.FC<{
   location: string;
 }> = ({ location }) => {
@@ -10,7 +10,10 @@ const LocationSegment: React.FC<{
   const splitted = location.split('/');
   let elements = [
     <span key={0}>
-      <LinkSpan onClick={() => history.push('/')}>Home</LinkSpan>/
+      <LinkSpan onClick={() => pushNewHistoryLocation('/', history)}>
+        Home
+      </LinkSpan>
+      /
     </span>
   ];
   splitted.forEach((splitEL, index) => {
@@ -23,7 +26,10 @@ const LocationSegment: React.FC<{
     }
     elements.push(
       <span key={path}>
-        <LinkSpan onClick={() => pushNewHistoryLocation(path, history)}>{splitEL}</LinkSpan>/
+        <LinkSpan onClick={() => pushNewHistoryLocation(path, history)}>
+          {splitEL}
+        </LinkSpan>
+        /
       </span>
     );
   });
