@@ -5,8 +5,9 @@ import Button from 'react-bootstrap/Button';
 import { ApplicationState, DispatchAction } from '../reducer';
 import { useHistory } from 'react-router';
 import { ContentTop, LoginIcon } from '../styles';
-import { loadPathData, LOCATION_LOGIN_KEY, StoredAuth } from '../service';
+import { loadPathData, StoredAuth } from '../service';
 import { TITLE_STR } from '../index';
+import { LOCATION_LOGIN_KEY } from '../constants';
 
 export const LoginButton = styled(Button).attrs({
   variant: 'success',

@@ -4,10 +4,10 @@ import styled from 'styled-components';
 import {
   getAuthForPath,
   loadPathData,
-  LOCATION_LOGIN_KEY,
   StoredAuth
 } from '../../../../service';
 import { useRootReducerProvider } from '../../../../index';
+import { LOCATION_LOGIN_KEY } from '../../../../constants';
 
 export const RemoveIcon = styled.i.attrs({
   className: 'fas fa-times'

@@ -31,6 +31,7 @@ import LocationLocked from './components/table-head/LocationLocked';
 import LocationLockedClear from './components/table-head/LocationLockedClear';
 import DialogUploadFile from './components/dialogs/DialogUploadFile';
 import DialogDeleteFile from './components/dialogs/DialogDeleteFiles';
+import { SETTING_SHOW_MODIFY_BUTTONS } from '../../constants';
 
 interface Props {
   pathData: FileListDataResponse;
@@ -162,11 +163,15 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
             {selectedFiles.length > 0 ? ` (${selectedFiles.length})` : ''}
           </TableSelectedDownloadButton>
         </LinkWhite>
-        <DialogUploadFile />
-        <DialogDeleteFile
-          selectedFiles={selectedFiles}
-          setSelectedFiles={setSelectedFiles}
-        />
+        {SETTING_SHOW_MODIFY_BUTTONS && (
+          <>
+            <DialogUploadFile />
+            <DialogDeleteFile
+              selectedFiles={selectedFiles}
+              setSelectedFiles={setSelectedFiles}
+            />
+          </>
+        )}
       </CenterDiv>
       <DiskStatsTable pathData={pathData} />
     </div>

@@ -2,20 +2,13 @@ import axios, { AxiosError } from 'axios';
 import { ACTION_TYPES, DispatchAction } from './reducer';
 import { History } from 'history';
 import queryString from 'query-string';
+import { API_URL, BASE_URL, LOCATION_LOGIN_KEY } from './constants';
 
 export interface StoredAuth {
   path: string;
   username: string;
   password: string;
 }
-
-export const BASE_URL =
-  window.location.protocol + '//' + window.location.hostname;
-/*export const BASE_URL = 'http://localhost:3001';*/
-/*export const BASE_URL = 'https://files.d3ff.se';*/
-
-export const API_URL = BASE_URL + '/api';
-export const LOCATION_LOGIN_KEY = 'location_login_storage';
 
 export const getAuthForPath = (path: string) => {
   const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
