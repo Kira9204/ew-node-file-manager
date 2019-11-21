@@ -11,7 +11,7 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "npm run clean && npm run compile",
     "compile": "tsc -p ./server/tsconfig.json",
-    "clean": "rimraf ./dist/*",
+    "clean": "rimraf ./server/dist/*",
     "watch": "tsc -p ./server/tsconfig.json --watch",
     "tslint": "tslint './src/**/*.{ts,tsx}'",
     "tslint:fix": "npm run tslint -- --fix",
