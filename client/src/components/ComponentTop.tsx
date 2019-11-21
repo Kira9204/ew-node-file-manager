@@ -10,10 +10,10 @@ import {
   LoadingWarningIcon
 } from '../styles';
 import { generateFileListingURL } from '../service';
-import { useRootReducerProvider } from '../index';
+import { TITLE_STR, useRootReducerProvider } from '../index';
 
 const ContentTop: React.FC = () => {
-  const {state, dispatch} = useRootReducerProvider();
+  const { state, dispatch } = useRootReducerProvider();
   const history = useHistory();
   if (state.statusCode === 401) {
     return <ListLoginPage state={state} dispatch={dispatch} />;
@@ -21,7 +21,7 @@ const ContentTop: React.FC = () => {
 
   return (
     <ContentTopStyle>
-      <h2>$D3FF file explorer</h2>
+      <h2>{TITLE_STR}</h2>
       <p>A private store for various files</p>
       {state.statusCode === 0 && (
         <>

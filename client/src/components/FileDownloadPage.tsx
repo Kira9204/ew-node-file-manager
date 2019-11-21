@@ -4,6 +4,7 @@ import { generateDownloadURL } from '../service';
 import { ContentTop, LinkSpan } from '../styles';
 import { Link } from './file-table/styles';
 import { formatFileSize, formatMTime } from './file-table/utils';
+import { TITLE_STR } from '../index';
 
 const FileDownloadPage: React.FC<{ file: FileStatInfo; history: any }> = ({
   file,
@@ -13,7 +14,7 @@ const FileDownloadPage: React.FC<{ file: FileStatInfo; history: any }> = ({
 
   return (
     <ContentTop>
-      <h2>$D3FF file explorer</h2>
+      <h2>{TITLE_STR}</h2>
       <h4>
         Download file:{' '}
         <Link

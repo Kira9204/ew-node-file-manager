@@ -69,7 +69,7 @@ export const loadPathData = (
     });
 };
 
-const cleanUrl = (str: String) => {
+export const cleanUrl = (str: String) => {
   return str.replace(/\/\//g, '/');
 };
 export const pushNewHistoryLocation = (location: string, history: History) => {

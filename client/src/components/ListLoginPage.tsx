@@ -6,6 +6,7 @@ import { ApplicationState, DispatchAction } from '../reducer';
 import { useHistory } from 'react-router';
 import { ContentTop, LoginIcon } from '../styles';
 import { loadPathData, LOCATION_LOGIN_KEY, StoredAuth } from '../service';
+import { TITLE_STR } from '../index';
 
 export const LoginButton = styled(Button).attrs({
   variant: 'success',
@@ -56,7 +57,7 @@ const ListLoginPage: React.FC<{
 
   return (
     <ContentTop>
-      <h2>$D3FF file explorer</h2>
+      <h2>{TITLE_STR}</h2>
       <p>A private store for various files</p>
       <LoginIcon />
       <p>This folder is protected by a username and password</p>

@@ -3,7 +3,7 @@ import { loadPathData } from './service';
 import FileTable from './components/file-table';
 import { useHistory } from 'react-router';
 import ContentTop from './components/ComponentTop';
-import { useRootReducerProvider } from './index';
+import { TITLE_STR, useRootReducerProvider } from './index';
 
 const App: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();
@@ -12,6 +12,7 @@ const App: React.FC = () => {
   React.useEffect(() => {
     console.log('Pathname', history.location.pathname);
     loadPathData(history.location.pathname, dispatch);
+    window.document.title = TITLE_STR + ': ' + history.location.pathname;
   }, [dispatch, history.location]);
 
   /* This page is only useful if you don't want to manage files from the page atm
