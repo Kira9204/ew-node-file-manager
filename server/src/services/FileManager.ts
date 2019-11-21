@@ -19,6 +19,7 @@ import {
   SETTING_IGNORE_NAMES,
   SETTING_SHOULD_FILESTAT_FOLDERS
 } from '../constants';
+import * as fileUpload from 'express-fileupload';
 
 interface FileListDataResponse {
   diskInfo: {
@@ -714,9 +715,25 @@ export const downloadGenerateZip = (
   zip.finalize();
 };
 
+const removeTmpFiles = (filesObj: undefined | fileUpload.FileArray) => {
+  if (!filesObj) {
+    return;
+  }
+
+  //Unlink requires a function
+  const dummyFunction = () => {};
+
+  Object.keys(filesObj).forEach((key) => {
+    // @ts-ignore
+    fs.unlink(filesObj[key].tempFilePath, dummyFunction);
+  });
+};
+
 export const uploadFile = (req: express.Request, res: express.Response) => {
   const requestPath = req.params[0];
+
   if (basicAuthFileModifyFailed(req, res, requestPath)) {
+    removeTmpFiles(req.files);
     return res
       .status(401)
       .json({ status: 401, message: 'Invalid Authentication Credentials' })
@@ -725,6 +742,7 @@ export const uploadFile = (req: express.Request, res: express.Response) => {
 
   const fsPath = getJailTranslatePath(requestPath);
   if (!fsPath) {
+    removeTmpFiles(req.files);
     return res
       .status(403)
       .json({ status: 403, message: 'You cannot upload files outside of jail' })
