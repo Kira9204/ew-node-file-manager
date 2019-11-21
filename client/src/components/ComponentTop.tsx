@@ -10,7 +10,8 @@ import {
   LoadingWarningIcon
 } from '../styles';
 import { generateFileListingURL } from '../service';
-import { TITLE_STR, useRootReducerProvider } from '../index';
+import { useRootReducerProvider } from '../index';
+import { TITLE_STR } from '../constants';
 
 const ContentTop: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();

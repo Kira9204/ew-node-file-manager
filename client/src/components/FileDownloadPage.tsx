@@ -4,7 +4,7 @@ import { generateDownloadURL } from '../service';
 import { ContentTop, LinkSpan } from '../styles';
 import { Link } from './file-table/styles';
 import { formatFileSize, formatMTime } from './file-table/utils';
-import { TITLE_STR } from '../index';
+import { TITLE_STR } from '../constants';
 
 const FileDownloadPage: React.FC<{ file: FileStatInfo; history: any }> = ({
   file,

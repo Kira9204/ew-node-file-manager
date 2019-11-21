@@ -6,8 +6,7 @@ import { ApplicationState, DispatchAction } from '../reducer';
 import { useHistory } from 'react-router';
 import { ContentTop, LoginIcon } from '../styles';
 import { loadPathData, StoredAuth } from '../service';
-import { TITLE_STR } from '../index';
-import { LOCATION_LOGIN_KEY } from '../constants';
+import { LOCATION_LOGIN_KEY, TITLE_STR } from '../constants';
 
 export const LoginButton = styled(Button).attrs({
   variant: 'success',

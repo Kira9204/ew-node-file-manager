@@ -13,7 +13,6 @@ export interface Provider {
   dispatch: (obj: DispatchAction) => void
 }
 
-export const TITLE_STR = '$D3FF file explorer';
 const history = createBrowserHistory();
 const RootReducerContext = React.createContext<Provider>({state: initialApplicationState, dispatch: () => {} });
 export const RootReducerProvider: React.FC<any> = ({

@@ -3,7 +3,8 @@ import { loadPathData } from './service';
 import FileTable from './components/file-table';
 import { useHistory } from 'react-router';
 import ContentTop from './components/ComponentTop';
-import { TITLE_STR, useRootReducerProvider } from './index';
+import { useRootReducerProvider } from './index';
+import { TITLE_STR } from './constants';
 
 const App: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();
