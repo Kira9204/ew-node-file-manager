@@ -15,7 +15,7 @@ const TableHeadFilesSelect: React.FC<{
   selectedFiles: string[];
   setSelectedFiles: (files: string[]) => void;
 }> = ({ filesData, selectedFiles, setSelectedFiles }) => {
-  if (filesData.length !== selectedFiles.length) {
+  if (filesData.length !== selectedFiles.length || filesData.length === 0) {
     return (
       <SelectAllTableHead
         onClick={() => {

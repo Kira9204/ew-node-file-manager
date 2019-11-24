@@ -106,6 +106,8 @@ export const getFAIcon = (
     case 'RAR':
     case '7Z':
       return 'far fa-file-archive';
+    case 'EXE':
+      return 'fab fa-windows';
     default:
       return 'far fa-file';
   }
@@ -235,63 +237,89 @@ export enum SORT_BY {
 export const SORT_BY_STORAGE_KEY = 'sort-by';
 export const sortFilePath = (
   currentSort: string,
-  filesData: FileStatInfo[],
-  setFilesData: (obj: FileStatInfo[]) => void,
-  setHasSortedFilePath: (val: boolean) => void
+  filesData: FileStatInfo[]
 ) => {
   let newFilesData = filesData.slice(0);
   switch (currentSort) {
     case SORT_BY.MODIFIED_DESC:
       sortFileStatsByDate(newFilesData);
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.MODIFIED_DESC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
     case SORT_BY.MODIFIED_ASC:
       sortFileStatsByDate(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.MODIFIED_ASC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
     case SORT_BY.SIZE_DESC:
       sortFileStatsBySize(newFilesData);
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.SIZE_DESC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
     case SORT_BY.SIZE_ASC:
       sortFileStatsBySize(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.SIZE_ASC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
     case SORT_BY.KIND_ASC:
       sortFileStatsExtensionName(newFilesData);
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.KIND_ASC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
     case SORT_BY.KIND_DESC:
       sortFileStatsExtensionName(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.KIND_DESC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
     case SORT_BY.NAME_ASC:
       sortFileStatsByName(newFilesData);
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.NAME_ASC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
     case SORT_BY.NAME_DESC:
       sortFileStatsByName(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.NAME_DESC);
-      setFilesData(newFilesData);
-      setHasSortedFilePath(true);
-      break;
+      return true;
   }
+  return false;
+};
+
+export const filterSearchNameFiles = (
+  searchStr: string,
+  filesData: FileStatInfo[]
+) => {
+  if (searchStr.trim().length === 0) {
+    return filesData;
+  }
+  return filesData.filter((e) => e.name.includes(searchStr));
+};
+
+export const filterValidSelectedFiles = (
+  selectedFiles: string[],
+  filesData: FileStatInfo[]
+) => {
+  const validSelectedFiles: string[] = [];
+  filesData.forEach((fileData) => {
+    if (selectedFiles.includes(fileData.name)) {
+      validSelectedFiles.push(fileData.name);
+    }
+  });
+  return validSelectedFiles;
+};
+
+export const arraysContainsSameNames = (names1: string[], names2: string[]) => {
+  if (
+    !Array.isArray(names1) ||
+    !Array.isArray(names2) ||
+    names1.length !== names2.length
+  ) {
+    return false;
+  }
+
+  const arr1 = names1.slice(0).sort();
+  const arr2 = names2.slice(0).sort();
+
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
 };

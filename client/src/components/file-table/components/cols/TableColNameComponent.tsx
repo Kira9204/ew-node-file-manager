@@ -117,10 +117,9 @@ const TableColNameComponent: React.FC<{
           const element = document.getElementById(
             `${fileItem.name}-manual-preview`
           );
-          if (!element) {
-            return;
+          if (element) {
+            element.click();
           }
-          element.click();
         }}
       />
     );

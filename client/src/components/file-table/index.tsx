@@ -1,12 +1,17 @@
 import React from 'react';
 import {
+  arraysContainsSameNames,
+  filterSearchNameFiles,
+  filterValidSelectedFiles,
   formatFileSize,
   formatMTime,
   SORT_BY,
-  SORT_BY_STORAGE_KEY,
   sortFilePath
 } from './utils';
-import { FileListDataResponse } from '../../reducer';
+import {
+  ACTION_TYPES,
+  usePreviousHook
+} from '../../reducer';
 import {
   CenterDiv,
   LinkWhite,
@@ -32,35 +37,68 @@ import LocationLockedClear from './components/table-head/LocationLockedClear';
 import DialogUploadFile from './components/dialogs/DialogUploadFile';
 import DialogDeleteFile from './components/dialogs/DialogDeleteFiles';
 import { SETTING_SHOW_MODIFY_BUTTONS } from '../../constants';
-
-interface Props {
-  pathData: FileListDataResponse;
-  location: string;
-}
+import Search from './components/Search';
+import { useRootReducerProvider } from '../../index';
 
 export const manualPreviewState: Map<string, boolean> = new Map();
-const FileTable: React.FC<Props> = ({ pathData, location }) => {
-  const [filesData, setFilesData] = React.useState(pathData.files);
-  const [currentSort, setCurrentSort] = React.useState(
-    '' + localStorage.getItem(SORT_BY_STORAGE_KEY)
-  );
-  const [hasSortedFilePath, setHasSortedFilePath] = React.useState(false);
-  const [previewFileName, setPreviewFileName] = React.useState('');
-  const [selectedFiles, setSelectedFiles] = React.useState<string[]>([]);
+const FileTable: React.FC = () => {
+  const { state, dispatch } = useRootReducerProvider();
+  const { pathData } = state;
+  const location = state.fsLocation;
+  const {
+    filePathIsReady,
+    filesData,
+    searchContains,
+    currentSort,
+    selectedFiles,
+    previewFileName
+  } = state.fileTable;
+  const prevSort = usePreviousHook(currentSort);
+  const prevSearch = usePreviousHook(searchContains);
+
+  const prevFileNames = usePreviousHook(state.pathData!.files.map((e) => e.name));
+
   React.useEffect(() => {
-    if (currentSort === 'null') {
-      setCurrentSort(SORT_BY.KIND_ASC);
+    if (
+      prevSort === state.fileTable.currentSort &&
+      prevSearch === state.fileTable.searchContains &&
+      arraysContainsSameNames(pathData!.files.map((e) => e.name), prevFileNames!)
+    ) {
       return;
     }
+
     manualPreviewState.clear();
-    setFilesData(pathData.files);
-    sortFilePath(
-      currentSort,
-      pathData.files,
-      setFilesData,
-      setHasSortedFilePath
+    const filteredPathData = filterSearchNameFiles(
+      searchContains,
+      pathData!.files
     );
-  }, [currentSort, pathData.files]);
+    sortFilePath(currentSort, filteredPathData);
+    const validSelectedFiles = filterValidSelectedFiles(
+      selectedFiles,
+      filteredPathData
+    );
+
+    const payload = {
+      filesData: filteredPathData,
+      currentSort: currentSort === 'null' ? SORT_BY.KIND_ASC : currentSort,
+      selectedFiles: validSelectedFiles
+    };
+    dispatch({
+      type: ACTION_TYPES.SET_FILETABLE_UPDATED_SETTINGS,
+      payload
+    });
+  }, [
+    currentSort,
+    dispatch,
+    pathData!.files,
+    prevFileNames,
+    prevSearch,
+    prevSort,
+    searchContains,
+    selectedFiles,
+    state.fileTable.currentSort,
+    state.fileTable.searchContains
+  ]);
 
   React.useEffect(() => {
     manualPreviewState.forEach((isOpen, fileName) => {
@@ -68,14 +106,45 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
         return;
       } else if (isOpen) {
         const element = document.getElementById(`${fileName}-manual-preview`);
-        if (!element) {
-          return;
+        if (element) {
+          element.click();
         }
-        element.click();
       }
     });
   }, [previewFileName]);
 
+  const setCurrentSort = (sort: string) => {
+    dispatch({
+      type: ACTION_TYPES.SET_FILETABLE_SORT_BY,
+      payload: sort
+    });
+  };
+
+  const setSelectedFiles = (selectedFiles: string[]) => {
+    dispatch({
+      type: ACTION_TYPES.SET_FILETABLE_SELECTED_FILES,
+      payload: selectedFiles
+    });
+  };
+
+  const setSearchContains = (searchString: string) => {
+    dispatch({
+      type: ACTION_TYPES.SET_FILETABLE_SEARCH_CONTAINS,
+      payload: searchString
+    });
+  };
+
+  const setPreviewFileName = (previewFileName: string) => {
+    dispatch({
+      type: ACTION_TYPES.SET_FILETABLE_SEARCH_CONTAINS,
+      payload: previewFileName
+    });
+  };
+
+  if (!filesData) {
+    return null;
+  }
+  console.log('render!');
   return (
     <div>
       <Table style={{ marginBottom: 8 }}>
@@ -121,6 +190,11 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
               <LocationLocked />
               &nbsp;&nbsp;
               <LocationLockedClear />
+              <br />
+              <Search
+                searchContains={searchContains}
+                setSearchContains={setSearchContains}
+              />
             </th>
             <th>Kind</th>
             <th>Size</th>
@@ -128,7 +202,7 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
           </tr>
         </thead>
         <tbody>
-          {hasSortedFilePath &&
+          {filePathIsReady &&
             filesData.map((fileItem, index) => (
               <TableRow key={fileItem.name + index}>
                 <TableColNameComponent
@@ -173,7 +247,7 @@ const FileTable: React.FC<Props> = ({ pathData, location }) => {
           </>
         )}
       </CenterDiv>
-      <DiskStatsTable pathData={pathData} />
+      <DiskStatsTable pathData={pathData!} />
     </div>
   );
 };

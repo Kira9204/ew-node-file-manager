@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+
 export interface FileStatInfo {
   name: string;
   path: string;
@@ -41,7 +43,14 @@ export interface ApplicationState {
     userName: string;
     password: string;
   };
-  selectedFiles: string[];
+  fileTable: {
+    filesData: null | FileStatInfo[];
+    currentSort: string;
+    filePathIsReady: boolean;
+    previewFileName: string;
+    selectedFiles: string[];
+    searchContains: string;
+  }
 }
 
 export interface DispatchAction {
@@ -70,13 +79,37 @@ export const initialApplicationState: ApplicationState = {
     userName: '',
     password: ''
   },
-  selectedFiles: []
+  fileTable: {
+    filesData: null,
+    currentSort: '',
+    filePathIsReady: false,
+    previewFileName: '',
+    selectedFiles: [],
+    searchContains: ''
+  }
 };
+
+//
+// If you need to store parts of this store and compare between renders, use this.
+//
+export const usePreviousHook = (state: any) => {
+    const ref = useRef();
+    useEffect(() => {
+      // @ts-ignore
+      ref.current = state;
+    }, [state]);
+    return ref.current;
+};
+
 export const ACTION_TYPES = {
   SET_LOAD_NEW_LOCATION: 'SET_LOAD_NEW_LOCATION',
   SET_LOADING_NEW_LOCATION_FAILURE: 'SET_LOADING_NEW_LOCATION_FAILURE',
   SET_LOADED_NEW_LOCATION_DATA: 'SET_LOADED_NEW_LOCATION_DATA',
-  SET_SELECTED_FILES: 'SET_SELECTED_FILES',
+  SET_FILETABLE_UPDATED_SETTINGS: 'SET_FILETABLE_UPDATED_SETTINGS',
+  SET_FILETABLE_SELECTED_FILES: 'SET_FILETABLE_SELECTED_FILES',
+  SET_FILETABLE_PREVIEW_FILE: 'SET_FILETABLE_PREVIEW_FILE',
+  SET_FILETABLE_SEARCH_CONTAINS: 'SET_FILETABLE_SEARCH_CONTAINS',
+  SET_FILETABLE_SORT_BY: 'SET_FILETABLE_SORT_BY',
   OPEN_UPLOAD_DIALOG: 'OPEN_UPLOAD_DIALOG',
   SET_UPLOAD_DIALOG_FILES: 'SET_UPLOAD_DIALOG_FILES',
   SET_UPLOAD_DIALOG_PERCENT: 'SET_UPLOAD_DIALOG_PERCENT',
@@ -111,6 +144,49 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
         statusCode: action.payload.statusCode,
         statusMessage: action.payload.statusMessage,
         pathData: action.payload.pathData
+      };
+    case ACTION_TYPES.SET_FILETABLE_UPDATED_SETTINGS:
+      return {
+        ...state,
+        fileTable:{
+          ...state.fileTable,
+          filesData: action.payload.filesData,
+          currentSort: action.payload.currentSort,
+          selectedFiles: action.payload.selectedFiles,
+          filePathIsReady: true
+        }
+      };
+    case ACTION_TYPES.SET_FILETABLE_SELECTED_FILES:
+      return {
+        ...state,
+        fileTable:{
+          ...state.fileTable,
+          selectedFiles: action.payload,
+        }
+      };
+    case ACTION_TYPES.SET_FILETABLE_PREVIEW_FILE:
+      return {
+        ...state,
+        fileTable:{
+          ...state.fileTable,
+          previewFileName: action.payload,
+        }
+      };
+    case ACTION_TYPES.SET_FILETABLE_SEARCH_CONTAINS:
+      return {
+        ...state,
+        fileTable:{
+          ...state.fileTable,
+          searchContains: action.payload,
+        }
+      };
+    case ACTION_TYPES.SET_FILETABLE_SORT_BY:
+      return {
+        ...state,
+        fileTable:{
+          ...state.fileTable,
+          currentSort: action.payload,
+        }
       };
     case ACTION_TYPES.OPEN_UPLOAD_DIALOG:
       return {

@@ -125,7 +125,6 @@ const DialogDeleteFile: React.FC<{
                 if (userName.length === 0 || password.length === 0) {
                   return;
                 }
-
                 axios
                   .delete(generateDeleteURL(state.fsLocation, selectedFiles), {
                     auth: {
@@ -145,7 +144,7 @@ const DialogDeleteFile: React.FC<{
                       type: ACTION_TYPES.SET_DELETE_DIALOG_ERROR,
                       payload: {
                         statusCode: err.response ? err.response.status : -1,
-                        statusMessage: 'Could not upload file(s)!'
+                        statusMessage: 'Could not delete file(s)!'
                       }
                     });
                   });
