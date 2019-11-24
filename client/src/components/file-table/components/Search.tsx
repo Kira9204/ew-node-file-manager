@@ -16,10 +16,11 @@ const Container = styled.div`
 const SearchIcon = styled.i.attrs({
   className: 'fas fa-search'
 })`
+  font-size: 130%;
   font-weight: 900;
   color: green;
   margin-left: 8px;
-  margin-right: 16px;
+  margin-right: 12px;
 `;
 
 const Search: React.FC<Props> = ({ searchContains, setSearchContains }) => {

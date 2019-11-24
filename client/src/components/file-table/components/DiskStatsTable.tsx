@@ -83,7 +83,7 @@ const DiskStatsTable: React.FC<Props> = ({ pathData }) => {
             <div>
               By Erik Welander (erik.welander@hotmail.com)
               <br />
-              Version: 0.1-2019-11-21
+              Version: 0.1-2019-11-24
             </div>
           </td>
         </TableRow>
