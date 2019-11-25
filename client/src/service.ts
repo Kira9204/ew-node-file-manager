@@ -10,19 +10,33 @@ export interface StoredAuth {
   password: string;
 }
 
-export const getAuthForPath = (path: string) => {
+/**
+ * Retrieves authentication for a URI location.
+ * Since configurations tend to have just a '/' for auth,
+ * And paths tends to be '/asd/d', we will also try the fist entry we find
+ * @param path A URI path.
+ * @param ignorePath If the path isn't found, try whatever is in the store.
+ */
+export const getAuthForPath = (path: string, ignorePath: boolean = false) => {
   const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
     ? localStorage.getItem(LOCATION_LOGIN_KEY)
     : '[]';
   const storedArr: StoredAuth[] = JSON.parse('' + stored);
-  return storedArr.find((e) => path.startsWith(e.path));
+  const found = storedArr.find((e) => path.startsWith(e.path));
+  if (found) {
+    return found;
+  }
+  if (ignorePath && storedArr.length > 0) {
+    return storedArr[0];
+  }
+  return null;
 };
 
 export const loadPathData = (
   filePath: string,
   dispatch: (obj: DispatchAction) => void
 ) => {
-  const auth = getAuthForPath(filePath);
+  const auth = getAuthForPath(filePath, true);
   const axiosAuth = auth
     ? {
         auth: {
@@ -63,16 +77,20 @@ export const loadPathData = (
 };
 
 export const cleanUrl = (str: String) => {
-  return str.replace(/\/\//g, '/');
+  let newStr = str.replace(/\/\//g, '/');
+  if (newStr.charAt(0) !== '/') {
+    newStr = '/' + newStr;
+  }
+  if (str.slice(-1) === '/') {
+    newStr = newStr.substring(0, newStr.length - 1);
+  }
+  return newStr;
 };
 export const pushNewHistoryLocation = (location: string, history: History) => {
-  if (location.charAt(0) !== '/') {
-    location = '/' + location;
-  }
   history.push(cleanUrl(location));
 };
 export const generateFileListingURL = (fileItemPath: string) => {
-  return API_URL + cleanUrl('/path/' + fileItemPath);
+  return API_URL + cleanUrl('/path/' + fileItemPath + '/');
 };
 export const generatePreviewURL = (fileItemPath: string) => {
   return API_URL + cleanUrl('/preview/' + fileItemPath);

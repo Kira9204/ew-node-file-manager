@@ -11,7 +11,6 @@ const App: React.FC = () => {
   const history = useHistory();
 
   React.useEffect(() => {
-    console.log('Pathname', history.location.pathname);
     loadPathData(history.location.pathname, dispatch);
     window.document.title = TITLE_STR + ': ' + history.location.pathname;
   }, [dispatch, history.location]);

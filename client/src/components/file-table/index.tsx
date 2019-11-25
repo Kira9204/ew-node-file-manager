@@ -53,13 +53,14 @@ const FileTable: React.FC = () => {
     selectedFiles,
     previewFileName
   } = state.fileTable;
+  const prevFsLocation = usePreviousHook(state.fsLocation);
   const prevSort = usePreviousHook(currentSort);
   const prevSearch = usePreviousHook(searchContains);
-
   const prevFileNames = usePreviousHook(state.pathData!.files.map((e) => e.name));
 
   React.useEffect(() => {
     if (
+      prevFsLocation === state.fsLocation &&
       prevSort === state.fileTable.currentSort &&
       prevSearch === state.fileTable.searchContains &&
       arraysContainsSameNames(pathData!.files.map((e) => e.name), prevFileNames!)
@@ -144,7 +145,6 @@ const FileTable: React.FC = () => {
   if (!filesData) {
     return null;
   }
-  console.log('render!');
   return (
     <div>
       <Table style={{ marginBottom: 8 }}>
@@ -241,7 +241,6 @@ const FileTable: React.FC = () => {
           <>
             <DialogUploadFile />
             <DialogDeleteFile
-              selectedFiles={selectedFiles}
               setSelectedFiles={setSelectedFiles}
             />
           </>

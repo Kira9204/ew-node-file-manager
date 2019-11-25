@@ -288,7 +288,9 @@ export const filterSearchNameFiles = (
   if (searchStr.trim().length === 0) {
     return filesData;
   }
-  return filesData.filter((e) => e.name.includes(searchStr));
+  return filesData.filter((e) =>
+    e.name.toLocaleLowerCase().includes(searchStr.toLocaleLowerCase())
+  );
 };
 
 export const filterValidSelectedFiles = (

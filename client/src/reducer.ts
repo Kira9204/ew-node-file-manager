@@ -50,7 +50,7 @@ export interface ApplicationState {
     previewFileName: string;
     selectedFiles: string[];
     searchContains: string;
-  }
+  };
 }
 
 export interface DispatchAction {
@@ -93,12 +93,12 @@ export const initialApplicationState: ApplicationState = {
 // If you need to store parts of this store and compare between renders, use this.
 //
 export const usePreviousHook = (state: any) => {
-    const ref = useRef();
-    useEffect(() => {
-      // @ts-ignore
-      ref.current = state;
-    }, [state]);
-    return ref.current;
+  const ref = useRef();
+  useEffect(() => {
+    // @ts-ignore
+    ref.current = state;
+  }, [state]);
+  return ref.current;
 };
 
 export const ACTION_TYPES = {
@@ -148,7 +148,7 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
     case ACTION_TYPES.SET_FILETABLE_UPDATED_SETTINGS:
       return {
         ...state,
-        fileTable:{
+        fileTable: {
           ...state.fileTable,
           filesData: action.payload.filesData,
           currentSort: action.payload.currentSort,
@@ -159,33 +159,33 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
     case ACTION_TYPES.SET_FILETABLE_SELECTED_FILES:
       return {
         ...state,
-        fileTable:{
+        fileTable: {
           ...state.fileTable,
-          selectedFiles: action.payload,
+          selectedFiles: action.payload
         }
       };
     case ACTION_TYPES.SET_FILETABLE_PREVIEW_FILE:
       return {
         ...state,
-        fileTable:{
+        fileTable: {
           ...state.fileTable,
-          previewFileName: action.payload,
+          previewFileName: action.payload
         }
       };
     case ACTION_TYPES.SET_FILETABLE_SEARCH_CONTAINS:
       return {
         ...state,
-        fileTable:{
+        fileTable: {
           ...state.fileTable,
-          searchContains: action.payload,
+          searchContains: action.payload
         }
       };
     case ACTION_TYPES.SET_FILETABLE_SORT_BY:
       return {
         ...state,
-        fileTable:{
+        fileTable: {
           ...state.fileTable,
-          currentSort: action.payload,
+          currentSort: action.payload
         }
       };
     case ACTION_TYPES.OPEN_UPLOAD_DIALOG:

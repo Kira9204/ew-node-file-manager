@@ -1,13 +1,14 @@
 import React from "react";
 import { useHistory } from "react-router"
 import {TableHeadArrowUpIcon} from "../../styles";
-import {pushNewHistoryLocation} from "../../../../service";
+import { cleanUrl, pushNewHistoryLocation } from '../../../../service';
 
 const LocationOneUp: React.FC<{
   location: string;
 }> = ({ location }) => {
   const history = useHistory();
-  let splitted = location.split('/');
+  const cleanLocation = cleanUrl(location);
+  let splitted = cleanLocation.split('/').slice(1); //First element will be empty string
   splitted = splitted.filter((e) => e !== '');
   if (splitted.length === 0) {
     return <TableHeadArrowUpIcon className="fas fa-arrow-up" />;
@@ -20,7 +21,7 @@ const LocationOneUp: React.FC<{
   return (
     <TableHeadArrowUpIcon
       className="fas fa-arrow-up"
-      onClick={() => pushNewHistoryLocation(path, history)}
+      onClick={() => pushNewHistoryLocation(cleanUrl(path), history)}
     />
   );
 };

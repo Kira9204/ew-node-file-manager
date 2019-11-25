@@ -30,6 +30,7 @@
     "@types/react-dom": "16.9.1",
     "@types/react-router": "^5.1.1",
     "@types/styled-components": "^4.1.19",
+    "rimraf": "^3.0.0",
     "cpx": "^1.5.0",
     "prettier": "^1.18.2",
     "tslint-config-prettier": "^1.18.0",
@@ -37,7 +38,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && cpx \"build/**/*.*\" \"../webpack-build\"",
+    "build": "rimraf \"./build/**/*\" && rimraf \"../webpack-build/**/*\" && react-scripts build && cpx \"build/**/*.*\" \"../webpack-build\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "tslint": "tslint './src/**/*.{ts,tsx}'",

@@ -6,7 +6,11 @@ import { ApplicationState, DispatchAction } from '../reducer';
 import { useHistory } from 'react-router';
 import { ContentTop, LoginIcon } from '../styles';
 import { loadPathData, StoredAuth } from '../service';
-import { LOCATION_LOGIN_KEY, TITLE_STR } from '../constants';
+import {
+  LOCATION_LOGIN_KEY,
+  SETTING_CHECK_PASS_GLOBAL,
+  TITLE_STR
+} from '../constants';
 
 export const LoginButton = styled(Button).attrs({
   variant: 'success',
@@ -15,6 +19,10 @@ export const LoginButton = styled(Button).attrs({
 })`
   background: green !important;
   margin: 0 auto !important;
+`;
+
+const StyledError = styled.div`
+  color: #dc3545;
 `;
 
 const addUserPasswordForPath = (
@@ -54,6 +62,10 @@ const ListLoginPage: React.FC<{
   const history = useHistory();
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [isStoreAsGlobal, setIsStoreAsGlobal] = React.useState(
+    SETTING_CHECK_PASS_GLOBAL
+  );
+  const [hasTriedLogin, setHasTriedLogin] = React.useState(false);
 
   return (
     <ContentTop>
@@ -113,20 +125,37 @@ const ListLoginPage: React.FC<{
           </Form.Group>
         </Form.Row>
         <Form.Row>
+          <Form.Group as={Col} controlId="useForEverRequestCheckbox">
+            <Form.Check
+              type="checkbox"
+              label="Store as global login (/)"
+              style={{ zoom: '1.2' }}
+              checked={isStoreAsGlobal}
+              onClick={() => setIsStoreAsGlobal(!isStoreAsGlobal)}
+            />
+          </Form.Group>
+        </Form.Row>
+        <Form.Row>
           <LoginButton
             onClick={() => {
               addUserPasswordForPath(
-                history.location.pathname,
+                isStoreAsGlobal ? '/' : history.location.pathname,
                 username,
                 password,
                 dispatch
               );
+              setTimeout(() => {
+                setHasTriedLogin(true);
+              }, 500);
             }}
           >
             Login
           </LoginButton>
         </Form.Row>
       </Form>
+      {hasTriedLogin && (
+        <StyledError>Invalid login for path!</StyledError>
+      )}
     </ContentTop>
   );
 };

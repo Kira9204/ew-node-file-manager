@@ -35,10 +35,10 @@ const StyledDeleteError = styled.div`
 `;
 
 const DialogDeleteFile: React.FC<{
-  selectedFiles: string[];
   setSelectedFiles: (files: string[]) => void;
-}> = ({ selectedFiles, setSelectedFiles }) => {
+}> = ({ setSelectedFiles }) => {
   const { state, dispatch } = useRootReducerProvider();
+  const selectedFiles = state.fileTable.selectedFiles;
   const userName = state.deleteDialog.userName;
   const password = state.deleteDialog.password;
 
