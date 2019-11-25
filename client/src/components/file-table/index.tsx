@@ -8,10 +8,7 @@ import {
   SORT_BY,
   sortFilePath
 } from './utils';
-import {
-  ACTION_TYPES,
-  usePreviousHook
-} from '../../reducer';
+import { ACTION_TYPES, usePreviousHook } from '../../reducer';
 import {
   CenterDiv,
   LinkWhite,
@@ -56,14 +53,19 @@ const FileTable: React.FC = () => {
   const prevFsLocation = usePreviousHook(state.fsLocation);
   const prevSort = usePreviousHook(currentSort);
   const prevSearch = usePreviousHook(searchContains);
-  const prevFileNames = usePreviousHook(state.pathData!.files.map((e) => e.name));
+  const prevFileNames = usePreviousHook(
+    state.pathData!.files.map((e) => e.name)
+  );
 
   React.useEffect(() => {
     if (
-      prevFsLocation === state.fsLocation &&
-      prevSort === state.fileTable.currentSort &&
-      prevSearch === state.fileTable.searchContains &&
-      arraysContainsSameNames(pathData!.files.map((e) => e.name), prevFileNames!)
+      prevFsLocation === location &&
+      prevSort === currentSort &&
+      prevSearch === searchContains &&
+      arraysContainsSameNames(
+        pathData!.files.map((e) => e.name),
+        prevFileNames!
+      )
     ) {
       return;
     }
@@ -73,15 +75,15 @@ const FileTable: React.FC = () => {
       searchContains,
       pathData!.files
     );
-    sortFilePath(currentSort, filteredPathData);
+    const sortedPathData = sortFilePath(currentSort, filteredPathData);
     const validSelectedFiles = filterValidSelectedFiles(
       selectedFiles,
-      filteredPathData
+      sortedPathData
     );
 
     const payload = {
-      filesData: filteredPathData,
-      currentSort: currentSort === 'null' ? SORT_BY.KIND_ASC : currentSort,
+      filesData: sortedPathData,
+      currentSort: currentSort === '' ? SORT_BY.NAME_DESC : currentSort,
       selectedFiles: validSelectedFiles
     };
     dispatch({
@@ -91,14 +93,14 @@ const FileTable: React.FC = () => {
   }, [
     currentSort,
     dispatch,
-    pathData!.files,
+    location,
+    pathData,
     prevFileNames,
+    prevFsLocation,
     prevSearch,
     prevSort,
     searchContains,
-    selectedFiles,
-    state.fileTable.currentSort,
-    state.fileTable.searchContains
+    selectedFiles
   ]);
 
   React.useEffect(() => {
@@ -137,7 +139,7 @@ const FileTable: React.FC = () => {
 
   const setPreviewFileName = (previewFileName: string) => {
     dispatch({
-      type: ACTION_TYPES.SET_FILETABLE_SEARCH_CONTAINS,
+      type: ACTION_TYPES.SET_FILETABLE_PREVIEW_FILE,
       payload: previewFileName
     });
   };
@@ -240,9 +242,7 @@ const FileTable: React.FC = () => {
         {SETTING_SHOW_MODIFY_BUTTONS && (
           <>
             <DialogUploadFile />
-            <DialogDeleteFile
-              setSelectedFiles={setSelectedFiles}
-            />
+            <DialogDeleteFile setSelectedFiles={setSelectedFiles} />
           </>
         )}
       </CenterDiv>

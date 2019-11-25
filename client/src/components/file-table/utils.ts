@@ -244,41 +244,41 @@ export const sortFilePath = (
     case SORT_BY.MODIFIED_DESC:
       sortFileStatsByDate(newFilesData);
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.MODIFIED_DESC);
-      return true;
+      return newFilesData;
     case SORT_BY.MODIFIED_ASC:
       sortFileStatsByDate(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.MODIFIED_ASC);
-      return true;
+      return newFilesData;
     case SORT_BY.SIZE_DESC:
       sortFileStatsBySize(newFilesData);
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.SIZE_DESC);
-      return true;
+      return newFilesData;
     case SORT_BY.SIZE_ASC:
       sortFileStatsBySize(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.SIZE_ASC);
-      return true;
+      return newFilesData;
     case SORT_BY.KIND_ASC:
-      sortFileStatsExtensionName(newFilesData);
-      localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.KIND_ASC);
-      return true;
-    case SORT_BY.KIND_DESC:
       sortFileStatsExtensionName(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.KIND_DESC);
-      return true;
-    case SORT_BY.NAME_ASC:
+      return newFilesData;
+    case SORT_BY.KIND_DESC:
+      sortFileStatsExtensionName(newFilesData);
+      localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.KIND_ASC);
+      return newFilesData;
+    case SORT_BY.NAME_DESC:
       sortFileStatsByName(newFilesData);
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.NAME_ASC);
-      return true;
-    case SORT_BY.NAME_DESC:
+      return newFilesData;
+    case SORT_BY.NAME_ASC:
+    default:
       sortFileStatsByName(newFilesData);
       newFilesData.reverse();
       localStorage.setItem(SORT_BY_STORAGE_KEY, SORT_BY.NAME_DESC);
-      return true;
+      return newFilesData;
   }
-  return false;
 };
 
 export const filterSearchNameFiles = (
