@@ -5,12 +5,8 @@ import Button from 'react-bootstrap/Button';
 import { ApplicationState, DispatchAction } from '../reducer';
 import { useHistory } from 'react-router';
 import { ContentTop, LoginIcon } from '../styles';
-import { loadPathData, StoredAuth } from '../service';
-import {
-  LOCATION_LOGIN_KEY,
-  SETTING_CHECK_PASS_GLOBAL,
-  TITLE_STR
-} from '../constants';
+import * as service from '../service';
+import { SETTING_CHECK_PASS_GLOBAL, TITLE_STR } from '../constants';
 
 export const LoginButton = styled(Button).attrs({
   variant: 'success',
@@ -25,40 +21,10 @@ const StyledError = styled.div`
   color: #dc3545;
 `;
 
-const addUserPasswordForPath = (
-  path: string,
-  username: string,
-  password: string,
-  dispatch: (obj: DispatchAction) => void
-) => {
-  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
-    ? localStorage.getItem(LOCATION_LOGIN_KEY)
-    : '[]';
-  const storedArr: StoredAuth[] = JSON.parse('' + stored);
-
-  for (let i = 0; i < storedArr.length; i++) {
-    if (path.startsWith(storedArr[i].path)) {
-      storedArr[i].username = username;
-      storedArr[i].password = password;
-      localStorage.setItem(LOCATION_LOGIN_KEY, JSON.stringify(storedArr));
-      loadPathData(path, dispatch);
-      return;
-    }
-  }
-
-  storedArr.push({
-    path,
-    username,
-    password
-  });
-  localStorage.setItem(LOCATION_LOGIN_KEY, JSON.stringify(storedArr));
-  loadPathData(path, dispatch);
-};
-
 const ListLoginPage: React.FC<{
   state: ApplicationState;
   dispatch: (obj: DispatchAction) => void;
-}> = ({ state, dispatch }) => {
+}> = ({ dispatch }) => {
   const history = useHistory();
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -78,18 +44,16 @@ const ListLoginPage: React.FC<{
         style={{ width: '20%', margin: '0 auto' }}
         onSubmit={(e: any) => {
           e.preventDefault();
-          const usernameEl = document.getElementById('loginUsername');
-          const passwordEl = document.getElementById('loginPassword');
-          if (usernameEl && passwordEl) {
-            // @ts-ignore
-            addUserPasswordForPath(
-              history.location.pathname,
-              // @ts-ignore
-              usernameEl.value,
-              // @ts-ignore
-              passwordEl.value,
-              dispatch
+          if (username.length !== 0 && password.length !== 0) {
+            service.authStoreNew(
+              isStoreAsGlobal ? '/' : history.location.pathname,
+              username,
+              password
             );
+            service.loadPathData(history.location.pathname, dispatch);
+            setTimeout(() => {
+              setHasTriedLogin(true);
+            }, 500);
           }
           return false;
         }}
@@ -131,31 +95,20 @@ const ListLoginPage: React.FC<{
               label="Store as global login (/)"
               style={{ zoom: '1.2' }}
               checked={isStoreAsGlobal}
-              onClick={() => setIsStoreAsGlobal(!isStoreAsGlobal)}
+              onClick={() => {
+                if (SETTING_CHECK_PASS_GLOBAL) {
+                  return;
+                }
+                setIsStoreAsGlobal(!isStoreAsGlobal);
+              }}
             />
           </Form.Group>
         </Form.Row>
         <Form.Row>
-          <LoginButton
-            onClick={() => {
-              addUserPasswordForPath(
-                isStoreAsGlobal ? '/' : history.location.pathname,
-                username,
-                password,
-                dispatch
-              );
-              setTimeout(() => {
-                setHasTriedLogin(true);
-              }, 500);
-            }}
-          >
-            Login
-          </LoginButton>
+          <LoginButton>Login</LoginButton>
         </Form.Row>
       </Form>
-      {hasTriedLogin && (
-        <StyledError>Invalid login for path!</StyledError>
-      )}
+      {hasTriedLogin && <StyledError>Invalid login for path!</StyledError>}
     </ContentTop>
   );
 };

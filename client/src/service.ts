@@ -2,27 +2,108 @@ import axios, { AxiosError } from 'axios';
 import { ACTION_TYPES, DispatchAction } from './reducer';
 import { History } from 'history';
 import queryString from 'query-string';
-import { API_URL, BASE_URL, LOCATION_LOGIN_KEY } from './constants';
+import {
+  API_URL,
+  BASE_URL,
+  LOCATION_LOGIN_KEY,
+  SETTING_CHECK_PASS_GLOBAL
+} from './constants';
 
 export interface StoredAuth {
-  path: string;
-  username: string;
-  password: string;
+  location: string;
+  auth: string;
 }
+
+/**
+ * If the user has keys in old or invalid formats they need to re-create the keys.
+ */
+export const authCleanUp = () => {
+  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
+    ? localStorage.getItem(LOCATION_LOGIN_KEY)
+    : '[]';
+  const storedArr: StoredAuth[] = JSON.parse('' + stored);
+  if (storedArr.length === 0) {
+    return false;
+  }
+
+  let hasInvalid = false;
+  for (let i = 0; i < storedArr.length; i++) {
+    const obj = storedArr[i];
+    if (!obj.auth || !obj.location) {
+      hasInvalid = true;
+      break;
+    }
+  }
+
+  if (hasInvalid) {
+    localStorage.removeItem(LOCATION_LOGIN_KEY);
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Adds a new key to a location, and replaces keys with the same location
+ * @param location
+ * @param username
+ * @param password
+ */
+export const authStoreNew = (
+  location: string,
+  username: string,
+  password: string
+) => {
+  const storeObj = { location, auth: window.btoa(username + ':' + password) };
+  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
+    ? localStorage.getItem(LOCATION_LOGIN_KEY)
+    : '[]';
+  const storedArr: StoredAuth[] = JSON.parse('' + stored);
+  const storedArrFiltered = storedArr.filter((e) => e.location !== location);
+
+  storedArrFiltered.push(storeObj);
+  localStorage.setItem(LOCATION_LOGIN_KEY, JSON.stringify(storedArrFiltered));
+
+  return storedArrFiltered;
+};
+
+/**
+ * Removes a location from the auth arr
+ * @param location
+ */
+export const removeAuthForLocation = (location: string) => {
+  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
+    ? localStorage.getItem(LOCATION_LOGIN_KEY)
+    : '[]';
+  const storedArr: StoredAuth[] = JSON.parse('' + stored);
+  let filteredAuth = storedArr.filter((e) => e.location !== location);
+  if (SETTING_CHECK_PASS_GLOBAL) {
+    filteredAuth = filteredAuth.filter((e) => e.location !== '/');
+  }
+
+  localStorage.setItem(LOCATION_LOGIN_KEY, JSON.stringify(filteredAuth));
+  return filteredAuth;
+};
 
 /**
  * Retrieves authentication for a URI location.
  * Since configurations tend to have just a '/' for auth,
  * And paths tends to be '/asd/d', we will also try the fist entry we find
- * @param path A URI path.
+ * @param location A URI path.
  * @param ignorePath If the path isn't found, try whatever is in the store.
  */
-export const getAuthForPath = (path: string, ignorePath: boolean = false) => {
+export const getAuthForPath = (
+  location: string,
+  ignorePath: boolean = false
+) => {
+  if (authCleanUp()) {
+    return null;
+  }
+
   const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
     ? localStorage.getItem(LOCATION_LOGIN_KEY)
     : '[]';
   const storedArr: StoredAuth[] = JSON.parse('' + stored);
-  const found = storedArr.find((e) => path.startsWith(e.path));
+  const found = storedArr.find((e) => location.startsWith(e.location));
   if (found) {
     return found;
   }
@@ -32,19 +113,24 @@ export const getAuthForPath = (path: string, ignorePath: boolean = false) => {
   return null;
 };
 
+/**
+ * Adds a basic auth header to axios
+ * @param authStr
+ */
+export const addAuthHeader = (authStr: string) => {
+  return {
+    headers: {
+      Authorization: 'Basic ' + authStr
+    }
+  };
+};
+
 export const loadPathData = (
   filePath: string,
   dispatch: (obj: DispatchAction) => void
 ) => {
-  const auth = getAuthForPath(filePath, true);
-  const axiosAuth = auth
-    ? {
-        auth: {
-          username: auth.username,
-          password: auth.password
-        }
-      }
-    : {};
+  const authObj = getAuthForPath(filePath, true);
+  const axiosAuth = authObj ? addAuthHeader(authObj.auth) : {};
 
   dispatch({
     type: ACTION_TYPES.SET_LOAD_NEW_LOCATION,

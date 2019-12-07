@@ -31,7 +31,7 @@ const App: React.FC = () => {
   return (
     <div>
       <ContentTop />
-      {state.statusCode === 200 && state.pathData && (
+      {state.pathData && (
         <FileTable />
       )}
     </div>

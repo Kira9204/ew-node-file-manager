@@ -129,6 +129,7 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
     case ACTION_TYPES.SET_LOAD_NEW_LOCATION:
       return {
         ...state,
+        statusCode: 0,
         fsLocation: action.payload
       };
     case ACTION_TYPES.SET_LOADING_NEW_LOCATION_FAILURE:
