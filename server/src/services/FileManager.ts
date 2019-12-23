@@ -288,7 +288,7 @@ export const generateFilePreview = (
   req: express.Request,
   res: express.Response
 ) => {
-  const requestPath = req.params[0];
+  const requestPath = req.params[0] ? req.params[0]: '/';
   const fsPath = getJailTranslatePath(requestPath);
   if (!fsPath) {
     return res
@@ -450,7 +450,7 @@ const sortFileStatsByDirectory = (fileStats: FileStatInfo[]) => {
  * @param res
  */
 export const getPathInfo = (req: express.Request, res: express.Response) => {
-  const requestPath = req.params[0];
+  const requestPath = req.params[0] ? req.params[0]: '/';
   const fsPath = getJailTranslatePath(requestPath);
   if (!fsPath) {
     return res
@@ -598,7 +598,7 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
  * @param res
  */
 export const downloadFile = (req: express.Request, res: express.Response) => {
-  const requestPath = req.params[0];
+  const requestPath = req.params[0] ? req.params[0]: '/';
   const fsPath = getJailTranslatePath(requestPath);
   if (!fsPath) {
     return res
@@ -730,7 +730,7 @@ const removeTmpFiles = (filesObj: undefined | fileUpload.FileArray) => {
 };
 
 export const uploadFile = (req: express.Request, res: express.Response) => {
-  const requestPath = req.params[0];
+  const requestPath = req.params[0] ? req.params[0]: '/';
 
   if (basicAuthFileModifyFailed(req, res, requestPath)) {
     removeTmpFiles(req.files);

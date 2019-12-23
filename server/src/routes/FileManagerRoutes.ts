@@ -23,6 +23,12 @@ router.get('/download/*', (req, res) => {
 router.get('/zip/*', (req, res) => {
   return downloadGenerateZip(req, res);
 });
+/**
+ * HTTP PUT does not capture /upload when you map /upload/asd
+ */
+router.put('/upload', (req, res) => {
+  return uploadFile(req, res);
+});
 router.put('/upload/*', (req, res) => {
   return uploadFile(req, res);
 });
