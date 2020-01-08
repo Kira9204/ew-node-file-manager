@@ -13,6 +13,7 @@ import { generateFileListingURL } from '../service';
 import { useRootReducerProvider } from '../index';
 import { TITLE_STR } from '../constants';
 
+let asyncTimerLoadingStatus = false;
 const ContentTop: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();
   const history = useHistory();
@@ -20,17 +21,28 @@ const ContentTop: React.FC = () => {
     return <ListLoginPage state={state} dispatch={dispatch} />;
   }
 
+  asyncTimerLoadingStatus = state.statusCode === 0;
+  setTimeout(() => {
+    if (asyncTimerLoadingStatus) {
+      const el = document.querySelector('#loading-filestat-spinner-container');
+      if (el) {
+        el.setAttribute('style', 'display: block;')
+      }
+    }
+
+  }, 1000);
+
   return (
     <ContentTopStyle>
       <h2>{TITLE_STR}</h2>
       <p>A private store for various files</p>
       {state.statusCode === 0 && (
-        <>
+        <div id='loading-filestat-spinner-container' style={{display: 'none'}}>
           <LoadingSpinner />
           <LoadingSpinnerText>
             GET {generateFileListingURL(state.fsLocation)}...
           </LoadingSpinnerText>
-        </>
+        </div>
       )}
       {[404, 403].includes(state.statusCode) && (
         <>

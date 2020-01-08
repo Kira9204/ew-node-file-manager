@@ -5,7 +5,7 @@ import { FileListDataResponse } from '../../../reducer';
 import styled from 'styled-components';
 import Table from 'react-bootstrap/Table';
 import Progressbar from 'react-bootstrap/ProgressBar';
-import { VERSION } from '../../../constants';
+import AuthorText from '../../AuthorText';
 
 interface Props {
   pathData: FileListDataResponse;
@@ -80,12 +80,7 @@ const DiskStatsTable: React.FC<Props> = ({ pathData }) => {
                 }
               />
             </DiskStatsTableTotalContainer>
-            <br />
-            <div>
-              By Erik Welander (erik.welander@hotmail.com)
-              <br />
-              Version: {VERSION}
-            </div>
+              <AuthorText marginTop='8px'/>
           </td>
         </TableRow>
       </tbody>

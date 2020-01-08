@@ -53,6 +53,13 @@ const getJailTranslatePath = (...paths: string[]) => {
   return newPath;
 };
 
+/**
+ * Looks for HTTP BASIC authentication headers and verifies them.
+ * Returns a boolean if the authentication passes.
+ * @param req
+ * @param res
+ * @param authObj
+ */
 const verifyLoginAgainstHeaders = (
   req: express.Request,
   res: express.Response,
@@ -63,10 +70,7 @@ const verifyLoginAgainstHeaders = (
     !req.headers.authorization ||
     req.headers.authorization.indexOf('Basic ') === -1
   ) {
-    return res
-      .status(401)
-      .json({ status: 401, message: 'Missing Authorization Header' })
-      .send();
+    return false;
   }
 
   // verify auth credentials
@@ -77,15 +81,12 @@ const verifyLoginAgainstHeaders = (
     authObj.user.toLowerCase() === username.toLowerCase() &&
     authObj.password === password;
   if (!validUser) {
-    return res
-      .status(401)
-      .json({ status: 401, message: 'Invalid Authentication Credentials' })
-      .send();
+    return false;
   }
-  return false;
+  return true;
 };
 
-const authCleanString = (str: string) => {
+const authCleanLocationString = (str: string) => {
   let cleanPath = str.trim().replace(/\.\./gm, '');
   if (cleanPath.charAt(0) === '/') {
     cleanPath = cleanPath.substring(1);
@@ -102,30 +103,29 @@ const authCleanString = (str: string) => {
  * @param res: The express response
  * @param location: Is this location jailed?
  */
-const basicAuthFileStatFailed = (
+const basicAuthFileStat = (
   req: express.Request,
   res: express.Response,
   location: string
 ) => {
   if (!AUTH_FILESTATS || AUTH_FILESTATS.length === 0) {
-    return false;
+    return true;
   }
-
-  const cleanLocation = authCleanString(location);
+  const cleanLocation = authCleanLocationString(location);
   let foundAuth = AUTH_FILESTATS.find((e) => {
     return (
-      cleanLocation.startsWith(authCleanString(e.path)) ||
+      cleanLocation.startsWith(authCleanLocationString(e.path)) ||
       e.path === '' ||
       e.path === '/'
     );
   });
   if (!foundAuth) {
-    return false;
+    return true;
   }
   return verifyLoginAgainstHeaders(req, res, foundAuth);
 };
 
-const basicAuthFileModifyFailed = (
+const basicAuthFileModify = (
   req: express.Request,
   res: express.Response,
   location: string
@@ -134,10 +134,10 @@ const basicAuthFileModifyFailed = (
     return true;
   }
 
-  const cleanLocation = authCleanString(location);
+  const cleanLocation = authCleanLocationString(location);
   let foundAuth = AUTH_MODIFY.find((e) => {
     return (
-      cleanLocation.startsWith(authCleanString(e.path)) ||
+      cleanLocation.startsWith(authCleanLocationString(e.path)) ||
       e.path === '' ||
       e.path === '/'
     );
@@ -288,7 +288,7 @@ export const generateFilePreview = (
   req: express.Request,
   res: express.Response
 ) => {
-  const requestPath = req.params[0] ? req.params[0]: '/';
+  const requestPath = req.params[0] ? req.params[0] : '/';
   const fsPath = getJailTranslatePath(requestPath);
   if (!fsPath) {
     return res
@@ -450,7 +450,7 @@ const sortFileStatsByDirectory = (fileStats: FileStatInfo[]) => {
  * @param res
  */
 export const getPathInfo = (req: express.Request, res: express.Response) => {
-  const requestPath = req.params[0] ? req.params[0]: '/';
+  const requestPath = req.params[0] ? req.params[0] : '/';
   const fsPath = getJailTranslatePath(requestPath);
   if (!fsPath) {
     return res
@@ -465,10 +465,14 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
       .json({ status: 404, message: 'The path provided does not exist' })
       .send();
   }
-  if (basicAuthFileStatFailed(req, res, requestPath)) {
+  if (
+    AUTH_FILESTATS &&
+    AUTH_FILESTATS.length > 0 &&
+    !basicAuthFileStat(req, res, requestPath)
+  ) {
     return res
       .status(401)
-      .json({ status: 401, message: 'Invalid Authentication Credentials' })
+      .json({ status: 401, message: 'Invalid Authentication' })
       .send();
   }
 
@@ -598,7 +602,7 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
  * @param res
  */
 export const downloadFile = (req: express.Request, res: express.Response) => {
-  const requestPath = req.params[0] ? req.params[0]: '/';
+  const requestPath = req.params[0] ? req.params[0] : '/';
   const fsPath = getJailTranslatePath(requestPath);
   if (!fsPath) {
     return res
@@ -730,13 +734,13 @@ const removeTmpFiles = (filesObj: undefined | fileUpload.FileArray) => {
 };
 
 export const uploadFile = (req: express.Request, res: express.Response) => {
-  const requestPath = req.params[0] ? req.params[0]: '/';
+  const requestPath = req.params[0] ? req.params[0] : '/';
 
-  if (basicAuthFileModifyFailed(req, res, requestPath)) {
+  if (!basicAuthFileModify(req, res, requestPath)) {
     removeTmpFiles(req.files);
     return res
       .status(401)
-      .json({ status: 401, message: 'Invalid Authentication Credentials' })
+      .json({ status: 401, message: 'Invalid Authentication' })
       .send();
   }
 
@@ -780,10 +784,10 @@ export const deleteFile = (req: express.Request, res: express.Response) => {
     ? [queryObj.fileNames]
     : queryObj.fileNames;
 
-  if (basicAuthFileModifyFailed(req, res, requestLocation)) {
+  if (!basicAuthFileModify(req, res, requestLocation)) {
     return res
       .status(401)
-      .json({ status: 401, message: 'Invalid Authentication Credentials' })
+      .json({ status: 401, message: 'Invalid Authentication' })
       .send();
   }
 

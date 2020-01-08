@@ -7,6 +7,7 @@ import { useHistory } from 'react-router';
 import { ContentTop, LoginIcon } from '../styles';
 import * as service from '../service';
 import { SETTING_CHECK_PASS_GLOBAL, TITLE_STR } from '../constants';
+import AuthorText from './AuthorText';
 
 export const LoginButton = styled(Button).attrs({
   variant: 'success',
@@ -109,6 +110,7 @@ const ListLoginPage: React.FC<{
         </Form.Row>
       </Form>
       {hasTriedLogin && <StyledError>Invalid login for path!</StyledError>}
+      <AuthorText marginTop="30px" />
     </ContentTop>
   );
 };

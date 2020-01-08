@@ -76,13 +76,18 @@ const DialogDeleteFile: React.FC<{
           >
             <Form.Row>
               <p>You are about to remove the following files:</p>
+            </Form.Row>
+            <Form.Row>
               <ul>
                 {selectedFiles.map((e) => (
                   <li key={e}>{e}</li>
                 ))}
               </ul>
-              <p>Provide a username and password to continue</p>
             </Form.Row>
+          <Form.Row>
+              <p>Provide a username and password to continue</p>
+          </Form.Row>
+
             <Form.Row>
               <Form.Group as={Col}>
                 <Form.Control
