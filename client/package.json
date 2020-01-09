@@ -38,7 +38,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "rimraf \"./build/**/*\" && rimraf \"../webpack-build/**/*\" && react-scripts build && cpx \"build/**/*.*\" \"../webpack-build\"",
+    "build": "rimraf \"./build/**/*\" && rimraf \"../webpack-build/**/*\" && react-scripts build && cpx \"robots.txt\" \"build\" && cpx \"build/**/*.*\" \"../webpack-build\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "tslint": "tslint './src/**/*.{ts,tsx}'",
