@@ -12,4 +12,4 @@ export const LOCATION_LOGIN_KEY = 'location_login_storage';
 export const SETTING_CHECK_PASS_GLOBAL = true;
 export const SETTING_SHOW_MODIFY_BUTTONS = true;
 export const TITLE_STR = '$D3FF file explorer';
-export const VERSION = '1.0 2020-01-09';
+export const VERSION = '1.0 2020-01-12';

@@ -176,10 +176,10 @@ export const pushNewHistoryLocation = (location: string, history: History) => {
   history.push(cleanUrl(location));
 };
 export const generateFileListingURL = (fileItemPath: string) => {
-  return API_URL + cleanUrl('/path/' + fileItemPath + '/');
+  return API_URL + cleanUrl(`/path/${fileItemPath}/`);
 };
 export const generatePreviewURL = (fileItemPath: string) => {
-  return API_URL + cleanUrl('/preview/' + fileItemPath);
+  return API_URL + cleanUrl(`/preview/${fileItemPath}`);
 };
 export const generateDownloadURL = (fileItemPath: string) => {
   /*
@@ -188,25 +188,44 @@ export const generateDownloadURL = (fileItemPath: string) => {
    * Use the following link for nginx downloads
    *  BASE_URL + cleanUrl('/download/' + fileItemPath);
    */
-  return BASE_URL + cleanUrl('/download/' + fileItemPath);
+  return BASE_URL + cleanUrl(`/download/${fileItemPath}`);
 };
 
 export const generateZIPDownloadURL = (
   location: string,
   fileNames: string[]
 ) => {
-  return (
-    API_URL + cleanUrl('/zip/' + queryString.stringify({ location, fileNames }))
-  );
+  let newUrl =
+    API_URL +
+    cleanUrl(`/zip/${location}?${queryString.stringify({ fileNames })}`);
+
+  const qLoc = newUrl.indexOf('?');
+  newUrl = newUrl.substring(0, qLoc - 1) + newUrl.substring(qLoc);
+
+  return newUrl;
 };
 
-export const generateUploadURL = (path: string) => {
-  return API_URL + cleanUrl('/upload/' + path);
+export const generateUploadURL = (
+  location: string,
+  newFolderName: string = ''
+) => {
+  if (newFolderName.length > 0) {
+    return (
+      API_URL +
+      cleanUrl(
+        `/upload/${location}?${queryString.stringify({ newFolderName })}`
+      )
+    );
+  }
+  return API_URL + cleanUrl(`/upload/${location}`);
 };
 
 export const generateDeleteURL = (location: string, fileNames: string[]) => {
-  return (
+  let newUrl =
     API_URL +
-    cleanUrl('/delete/' + queryString.stringify({ location, fileNames }))
-  );
+    cleanUrl(`/delete/${location}?${queryString.stringify({ fileNames })}`);
+  const qLoc = newUrl.indexOf('?');
+  newUrl = newUrl.substring(0, qLoc - 1) + newUrl.substring(qLoc);
+
+  return newUrl;
 };

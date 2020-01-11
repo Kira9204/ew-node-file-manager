@@ -33,6 +33,7 @@ export interface ApplicationState {
     uploadPercent: number;
     statusCode: number;
     statusMessage: string;
+    newFolderName: string;
     userName: string;
     password: string;
   };
@@ -69,6 +70,7 @@ export const initialApplicationState: ApplicationState = {
     uploadPercent: 0,
     statusCode: 0,
     statusMessage: '',
+    newFolderName: '',
     userName: '',
     password: ''
   },
@@ -113,6 +115,7 @@ export const ACTION_TYPES = {
   OPEN_UPLOAD_DIALOG: 'OPEN_UPLOAD_DIALOG',
   SET_UPLOAD_DIALOG_FILES: 'SET_UPLOAD_DIALOG_FILES',
   SET_UPLOAD_DIALOG_PERCENT: 'SET_UPLOAD_DIALOG_PERCENT',
+  SET_UPLOAD_DIALOG_NEW_FOLDER: 'SET_UPLOAD_DIALOG_NEW_FOLDER',
   SET_UPLOAD_DIALOG_USERNAME: 'SET_UPLOAD_DIALOG_USERNAME',
   SET_UPLOAD_DIALOG_PASSWORD: 'SET_UPLOAD_DIALOG_PASSWORD',
   SET_UPLOAD_DIALOG_ERROR: 'SET_UPLOAD_DIALOG_ERROR',
@@ -220,6 +223,14 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           uploadPercent: action.payload
         }
       };
+    case ACTION_TYPES.SET_UPLOAD_DIALOG_NEW_FOLDER:
+      return {
+        ...state,
+        uploadDialog: {
+          ...state.uploadDialog,
+          newFolderName: action.payload
+        }
+      };
     case ACTION_TYPES.SET_UPLOAD_DIALOG_USERNAME:
       return {
         ...state,
@@ -255,6 +266,7 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           uploadPercent: 0,
           statusCode: 0,
           statusMessage: '',
+          newFolderName: '',
           userName: '',
           password: ''
         }

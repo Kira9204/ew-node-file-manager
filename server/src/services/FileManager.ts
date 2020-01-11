@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import rimraf from 'rimraf';
 import getImageSize from 'image-size';
 import mimeTypes from 'mime-types';
 import sharp from 'sharp';
@@ -7,7 +8,6 @@ import md5File from 'md5-file';
 import stream from 'stream';
 // @ts-ignore
 import diskUsage from 'diskusage';
-import queryString from 'query-string';
 import archiver from 'archiver';
 import express from 'express';
 import {
@@ -86,8 +86,12 @@ const verifyLoginAgainstHeaders = (
   return true;
 };
 
+const cleanPathStr = (input: string) => {
+  return input.trim().replace(/\.\./gm, '');
+};
+
 const authCleanLocationString = (str: string) => {
-  let cleanPath = str.trim().replace(/\.\./gm, '');
+  let cleanPath = cleanPathStr(str);
   if (cleanPath.charAt(0) === '/') {
     cleanPath = cleanPath.substring(1);
   }
@@ -635,17 +639,18 @@ export const downloadGenerateZip = (
   req: express.Request,
   res: express.Response
 ) => {
-  const queryObj = queryString.parse(req.params[0]);
-  const requestLocation = '' + queryObj.location;
-  if (!queryObj.fileNames || queryObj.fileNames.length < 1) {
+  const requestLocation = '/' + (req.params[0] ? req.params[0] : '');
+  const queryParams = req.query;
+
+  if (!queryParams.fileNames || queryParams.fileNames.length < 1) {
     return res
       .status(403)
       .json({ status: 403, message: 'No filenames provided' })
       .send();
   }
-  const requestFileNames: string[] = !Array.isArray(queryObj.fileNames)
-    ? [queryObj.fileNames]
-    : queryObj.fileNames;
+  const requestFileNames: string[] = !Array.isArray(queryParams.fileNames)
+    ? [queryParams.fileNames]
+    : queryParams.fileNames;
 
   const fsPath = getJailTranslatePath(requestLocation);
   if (!fsPath) {
@@ -734,7 +739,10 @@ const removeTmpFiles = (filesObj: undefined | fileUpload.FileArray) => {
 };
 
 export const uploadFile = (req: express.Request, res: express.Response) => {
-  const requestPath = req.params[0] ? req.params[0] : '/';
+  const requestPath = '/' + (req.params[0] ? req.params[0] : '');
+  const newFolderName = req.query.newFolderName
+    ? cleanPathStr(req.query.newFolderName)
+    : null;
 
   if (!basicAuthFileModify(req, res, requestPath)) {
     removeTmpFiles(req.files);
@@ -758,31 +766,53 @@ export const uploadFile = (req: express.Request, res: express.Response) => {
   const totalToMove = objectKeys.length;
   let totalMoved = 0;
 
+  if (newFolderName) {
+    try {
+      fs.mkdirSync(fsPath + '/' + newFolderName, 775);
+    } catch (e) {
+      return res
+        .status(500)
+        .json({ status: 500, message: 'Failed to create directory!' })
+        .send();
+    }
+  }
+
   objectKeys.forEach((key: string) => {
     // @ts-ignore
     const file = req.files[key];
+
     // @ts-ignore
-    file.mv(fsPath + '/' + file.name, () => {
+    let toPath: string;
+    if (!newFolderName) {
+      // @ts-ignore
+      toPath = fsPath + '/' + file.name;
+    } else {
+      // @ts-ignore
+      toPath = fsPath + '/' + newFolderName + '/' + file.name;
+    }
+
+    // @ts-ignore
+    file.mv(toPath, () => {
       totalMoved += 1;
       if (totalMoved === totalToMove) {
-        res.status(201).send();
+        return res.status(201).send();
       }
     });
   });
 };
 
 export const deleteFile = (req: express.Request, res: express.Response) => {
-  const queryObj = queryString.parse(req.params[0]);
-  const requestLocation = '' + queryObj.location;
-  if (!queryObj.fileNames || queryObj.fileNames.length < 1) {
+  const requestLocation = '/' + (req.params[0] ? req.params[0] : '');
+  const queryParams = req.query;
+  if (!queryParams.fileNames || queryParams.fileNames.length < 1) {
     return res
       .status(403)
       .json({ status: 403, message: 'No filenames provided' })
       .send();
   }
-  const requestFileNames: string[] = !Array.isArray(queryObj.fileNames)
-    ? [queryObj.fileNames]
-    : queryObj.fileNames;
+  const requestFileNames: string[] = !Array.isArray(queryParams.fileNames)
+    ? [queryParams.fileNames]
+    : queryParams.fileNames;
 
   if (!basicAuthFileModify(req, res, requestLocation)) {
     return res
@@ -846,7 +876,7 @@ export const deleteFile = (req: express.Request, res: express.Response) => {
       } catch (e) {}
     } else if (fileStats.isDirectory()) {
       try {
-        fs.rmdirSync(filePath);
+        rimraf.sync(filePath);
         removedFiles += 1;
       } catch (e) {}
     }

@@ -10,9 +10,15 @@ import Button from 'react-bootstrap/Button';
 import Progressbar from 'react-bootstrap/ProgressBar';
 
 const StyledModal = styled(Modal)`
-  &&& .modal-content {
-    background-color: #1c2739;
-    color: white;
+  &&& {
+    .modal-content {
+      background-color: #1c2739;
+      color: white;
+    }
+    .close {
+      color: white;
+      opacity: 1;
+    }
   }
 `;
 
@@ -37,6 +43,7 @@ const UploadButton = styled(Button).attrs({
 
 const DialogUploadFile: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();
+  const newFolderName = state.uploadDialog.newFolderName;
   const userName = state.uploadDialog.userName;
   const password = state.uploadDialog.password;
 
@@ -86,6 +93,22 @@ const DialogUploadFile: React.FC = () => {
               />
             </div>
 
+            <Form.Row>
+              <Form.Group as={Col}>
+                <Form.Control
+                  id="folderName"
+                  type="text"
+                  placeholder="Place inside new folder?"
+                  value={newFolderName}
+                  onChange={(e: any) => {
+                    dispatch({
+                      type: ACTION_TYPES.SET_UPLOAD_DIALOG_NEW_FOLDER,
+                      payload: e.target.value
+                    });
+                  }}
+                />
+              </Form.Group>
+            </Form.Row>
             <Form.Row>
               <Form.Group as={Col}>
                 <Form.Control
@@ -166,7 +189,7 @@ const DialogUploadFile: React.FC = () => {
                 });
 
                 axios
-                  .put(generateUploadURL(state.fsLocation), data, config)
+                  .post(generateUploadURL(state.fsLocation, newFolderName), data, config)
                   .then((res) => {
                     loadPathData(state.fsLocation, dispatch);
                     dispatch({

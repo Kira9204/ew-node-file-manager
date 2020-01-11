@@ -20,17 +20,22 @@ router.get('/preview/*', (req, res) => {
 router.get('/download/*', (req, res) => {
   return downloadFile(req, res);
 });
+router.get('/zip', (req, res) => {
+  return downloadGenerateZip(req, res);
+});
 router.get('/zip/*', (req, res) => {
   return downloadGenerateZip(req, res);
 });
-/**
- * HTTP PUT does not capture /upload when you map /upload/asd
- */
-router.put('/upload', (req, res) => {
+
+router.post('/upload', (req, res) => {
   return uploadFile(req, res);
 });
-router.put('/upload/*', (req, res) => {
+router.post('/upload/*', (req, res) => {
   return uploadFile(req, res);
+});
+
+router.delete('/delete', (req, res) => {
+  return deleteFile(req, res);
 });
 router.delete('/delete/*', (req, res) => {
   return deleteFile(req, res);

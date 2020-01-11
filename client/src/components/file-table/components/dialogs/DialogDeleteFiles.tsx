@@ -8,9 +8,15 @@ import { generateDeleteURL, loadPathData } from '../../../../service';
 import Button from 'react-bootstrap/Button';
 
 const StyledModal = styled(Modal)`
-  &&& .modal-content {
-    background-color: #1c2739;
-    color: white;
+  &&& {
+    .modal-content {
+        background-color: #1c2739;
+        color: white;
+    }
+    .close {
+        color: white;
+        opacity: 1;
+    }
   }
 `;
 
@@ -84,9 +90,9 @@ const DialogDeleteFile: React.FC<{
                 ))}
               </ul>
             </Form.Row>
-          <Form.Row>
+            <Form.Row>
               <p>Provide a username and password to continue</p>
-          </Form.Row>
+            </Form.Row>
 
             <Form.Row>
               <Form.Group as={Col}>
