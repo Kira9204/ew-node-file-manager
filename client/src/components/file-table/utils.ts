@@ -3,12 +3,11 @@ import mimeTypes from 'mime-types';
 import { FileStatInfo } from '../../reducer';
 import path from 'path';
 
-const UTCTimeOffset = new Date().getTimezoneOffset();
 export const formatFileSize = (size: number) => {
   return fileSize(size, { base: 10, round: 2 });
 };
 export const formatMTime = (mTimeUnix: number) => {
-  const date = new Date(mTimeUnix + 60000 * UTCTimeOffset);
+  const date = new Date(mTimeUnix);
   return `${date.getFullYear()}-${
     date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1
   }-${date.getDate() < 10 ? '0' + date.getDate() : date.getDate()} ${
