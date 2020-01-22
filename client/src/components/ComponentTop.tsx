@@ -25,7 +25,7 @@ const ContentTop: React.FC = () => {
       if (state.statusCode === 0) {
         setShowLoadingSpinner(true);
       }
-    }, 200);
+    }, 500);
   }, [state.statusCode]);
 
 
