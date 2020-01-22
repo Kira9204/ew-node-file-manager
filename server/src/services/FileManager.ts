@@ -272,15 +272,24 @@ export const isText = (fileName: string) => {
  * @param filePath
  * @param res
  */
-export const sendFile = (filePath: string, res: express.Response) => {
-  const r = fs.createReadStream(filePath);
-  const ps = new stream.PassThrough(); // <---- this makes a trick with stream error handling
-  stream.pipeline(r, ps, (err) => {
+export const sendFile = (filePath: string, req: express.Request, res: express.Response) => {
+  const options = {
+    headers: {
+      "Etag": generateFileMD5(filePath)
+    }
+  };
+  const requestEtag = req.header('Etag') || req.header('if-None-Match');
+  if (requestEtag && requestEtag === options.headers.Etag) {
+    return res.sendStatus(304);
+  }
+
+
+  return res.sendFile(filePath, options, (err) => {
     if (err) {
-      return res.sendStatus(400);
+      return res.sendStatus(500);
     }
   });
-  return ps.pipe(res);
+
 };
 
 /**
@@ -363,7 +372,7 @@ const generateImageFilePreview = (
     imginfo.height < requestedHeight ||
     imginfo.type === 'gif'
   ) {
-    return sendFile(fsPath, res);
+    return sendFile(fsPath, req, res);
   }
 
   const thumbsDir = path.normalize(PATH_TMP_UPLOAD + '/__generated_thumbs__');
@@ -386,14 +395,14 @@ const generateImageFilePreview = (
   );
 
   if (fs.existsSync(fileHashPath)) {
-    return sendFile(fileHashPath, res);
+    return sendFile(fileHashPath, req, res);
   }
 
   sharp(fsPath)
     .resize(requestedWidth, requestedHeight)
     .toFile(fileHashPath)
     .then((newFileInfo) => {
-      return sendFile(fileHashPath, res);
+      return sendFile(fileHashPath, req, res);
     })
     .catch((err) => {
       return res
@@ -627,7 +636,7 @@ export const downloadFile = (req: express.Request, res: express.Response) => {
       .json({ status: 400, message: 'You cannot download a directory!' })
       .send();
   }
-  return sendFile(fsPath, res);
+  return sendFile(fsPath, req, res);
 };
 
 /**

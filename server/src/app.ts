@@ -31,7 +31,7 @@ app.use('/api', FileManagerRoutes);
 app.use('/', express.static(PATH_WEBPACK_BUILD));
 //Always return index.html for 404 routes (MUST BE PLACED LAST)
 app.get('*', (req, res) => {
-  sendFile(PATH_WEBPACK_BUILD + '/index.html', res);
+  sendFile(PATH_WEBPACK_BUILD + '/index.html', req, res);
 });
 
 module.exports = app;
