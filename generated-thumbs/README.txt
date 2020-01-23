@@ -1,0 +1,1 @@
+Generated thumbnails of images will be placed here.
