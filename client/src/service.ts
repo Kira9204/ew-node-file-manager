@@ -200,7 +200,7 @@ export const generateZIPDownloadURL = (
     cleanUrl(`/zip/${location}?${queryString.stringify({ fileNames })}`);
 
   const qLoc = newUrl.indexOf('?');
-  if (newUrl.charAt(qLoc-1) === '/') {
+  if (newUrl.charAt(qLoc - 1) === '/') {
     newUrl = newUrl.substring(0, qLoc - 1) + newUrl.substring(qLoc);
   }
 
@@ -227,7 +227,7 @@ export const generateDeleteURL = (location: string, fileNames: string[]) => {
     API_URL +
     cleanUrl(`/delete/${location}?${queryString.stringify({ fileNames })}`);
   const qLoc = newUrl.indexOf('?');
-  if (newUrl.charAt(qLoc-1) === '/') {
+  if (newUrl.charAt(qLoc - 1) === '/') {
     newUrl = newUrl.substring(0, qLoc - 1) + newUrl.substring(qLoc);
   }
 

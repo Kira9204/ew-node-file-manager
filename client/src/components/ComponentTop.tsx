@@ -20,13 +20,14 @@ const ContentTop: React.FC = () => {
 
   //Delay the loading spinner
   React.useEffect(() => {
-    setShowLoadingSpinner(false);
     setTimeout(() => {
       if (state.statusCode === 0) {
         setShowLoadingSpinner(true);
+      } else {
+        setShowLoadingSpinner(false);
       }
     }, 500);
-  }, [state.statusCode]);
+  }, [showLoadingSpinner, state.statusCode]);
 
 
   if (state.statusCode === 401) {

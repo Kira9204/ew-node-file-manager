@@ -11,6 +11,11 @@ const app = express();
 //debugging
 //app.use(morgan('dev'));
 
+// We use our own eTags.
+// This also gets rid of potential
+// 'Error [ERR_HTTP_HEADERS_SENT]: Cannot remove headers after they are sent to the client'
+// Errors since express aggressively tries to modify the headers with it's own Etags for everything.
+app.disable('etag');
 //Enable CORS
 app.use(cors());
 //Load the JSON body parser

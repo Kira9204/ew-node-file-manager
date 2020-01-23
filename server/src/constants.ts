@@ -2,6 +2,10 @@ import path from 'path';
 
 export const PATH_PUBLIC_FILES = path.join(__dirname, '../../public-files');
 export const PATH_WEBPACK_BUILD = path.join(__dirname, '../../webpack-build');
+export const PATH_GENERATED_THUMBS = path.join(
+  __dirname,
+  '../../generated-thumbs'
+);
 export const PATH_TMP_UPLOAD = path.join(__dirname, '../../tmp-upload');
 
 export interface AUTH_DIR {

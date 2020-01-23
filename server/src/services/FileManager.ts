@@ -5,7 +5,6 @@ import getImageSize from 'image-size';
 import mimeTypes from 'mime-types';
 import sharp from 'sharp';
 import md5File from 'md5-file';
-import stream from 'stream';
 // @ts-ignore
 import diskUsage from 'diskusage';
 import archiver from 'archiver';
@@ -14,8 +13,8 @@ import {
   AUTH_DIR,
   AUTH_FILESTATS,
   AUTH_MODIFY,
+  PATH_GENERATED_THUMBS,
   PATH_PUBLIC_FILES,
-  PATH_TMP_UPLOAD,
   SETTING_IGNORE_NAMES,
   SETTING_SHOULD_FILESTAT_FOLDERS
 } from '../constants';
@@ -272,10 +271,14 @@ export const isText = (fileName: string) => {
  * @param filePath
  * @param res
  */
-export const sendFile = (filePath: string, req: express.Request, res: express.Response) => {
+export const sendFile = (
+  filePath: string,
+  req: express.Request,
+  res: express.Response
+) => {
   const options = {
     headers: {
-      "Etag": generateFileMD5(filePath)
+      Etag: generateFileMD5(filePath)
     }
   };
   const requestEtag = req.header('Etag') || req.header('if-None-Match');
@@ -283,13 +286,11 @@ export const sendFile = (filePath: string, req: express.Request, res: express.Re
     return res.sendStatus(304);
   }
 
-
   return res.sendFile(filePath, options, (err) => {
     if (err) {
       return res.sendStatus(500);
     }
   });
-
 };
 
 /**
@@ -375,16 +376,10 @@ const generateImageFilePreview = (
     return sendFile(fsPath, req, res);
   }
 
-  const thumbsDir = path.normalize(PATH_TMP_UPLOAD + '/__generated_thumbs__');
-  if (!fs.existsSync(thumbsDir)) {
-    fs.mkdirSync(thumbsDir);
-  }
-
   const ext = path.extname(fsPath);
   const fileHash = generateFileMD5(fsPath);
   const fileHashPath = path.normalize(
-    PATH_TMP_UPLOAD +
-      '/__generated_thumbs__' +
+    PATH_GENERATED_THUMBS +
       '/' +
       fileHash +
       '_' +
