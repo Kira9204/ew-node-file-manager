@@ -73,6 +73,7 @@ export const getFAIcon = (
     case 'INI':
     case 'LOG':
     case 'CONF':
+    case 'SERVICE':
     case 'CF':
       return 'far fa-file-alt';
     case 'JS':
