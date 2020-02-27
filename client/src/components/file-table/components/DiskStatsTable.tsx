@@ -49,15 +49,15 @@ const DiskStatsTable: React.FC<Props> = ({ pathData }) => {
           <td>
             <TableColNameIcon className={getFAIcon('', '', true)} />
             <TableColNameAlign>
-              &nbsp;&nbsp;&nbsp;Total: {sizeInfo.numFolders}
+              &nbsp;Total: {sizeInfo.numFolders}
               {sizeInfo.sizeFolders !== 0 && (
                 <>.&nbsp;Size: {formatFileSize(sizeInfo.sizeFolders)}</>
               )}
             </TableColNameAlign>
             <DiskStatsTableTDSpacer />
             <TableColNameIcon className={getFAIcon('', '', false)} />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <TableColNameAlign>
+                <span style={{marginLeft: '17px'}} />
               Total: {sizeInfo.numFiles}
               {sizeInfo.sizeFiles !== 0 && (
                 <>.&nbsp;Size: {formatFileSize(sizeInfo.sizeFiles)}</>

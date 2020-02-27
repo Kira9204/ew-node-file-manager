@@ -186,11 +186,11 @@ const FileTable: React.FC = () => {
           <tr>
             <th>
               <LocationOneUp location={location} />
-              &nbsp;&nbsp;&nbsp;&nbsp;
+                <span style={{marginLeft: '15px'}} />
               <LocationSegment location={location} />
               &nbsp;
               <LocationLocked />
-              &nbsp;&nbsp;
+              &nbsp;
               <LocationLockedClear />
               <br />
               <Search

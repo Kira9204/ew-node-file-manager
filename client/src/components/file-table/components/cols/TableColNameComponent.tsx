@@ -36,6 +36,15 @@ const TableColNameIconTogglePopover = styled.i`
   cursor: pointer;
 `;
 
+const TableColNameIconPreviewExternal = styled.i.attrs({className: 'fas fa-external-link-alt'})`
+  vertical-align: middle;
+  font-size: 100%;
+  margin-left: 10px;
+  margin-top: 3px;
+  color: green;
+  cursor: pointer;
+`;
+
 const ToolTip = styled.div`
   position: relative;
 `;
@@ -92,6 +101,10 @@ const ToolTipVideo = styled.video.attrs({
   margin-left: 30px;
   border: 0;
 `;
+
+const VALID_HTML5_VIDEO_EXTENSIONS = ['MP4', 'OGV', 'WEBM'];
+const VALID_HTML5_AUDIO_EXTENSIONS = ['MP3', 'OGG', 'AAC', 'WEBM', 'WAV'];
+
 
 const TableColNameComponent: React.FC<{
   fileItem: FileStatInfo;
@@ -248,6 +261,9 @@ const TableColNameComponent: React.FC<{
               />
             </OverlayTrigger>
           </TableColNameAlign>
+          <Link href={generatePreviewURL(fileItem.path)} target="_blank">
+            <TableColNameIconPreviewExternal />
+          </Link>
         </>
       </TableColName>
     );
@@ -267,35 +283,37 @@ const TableColNameComponent: React.FC<{
             <TableColNameAlign>{fileItem.name}</TableColNameAlign>
           </Link>
           <TableColNameAlign>
-            <OverlayTrigger
-              placement="right-end"
-              trigger="click"
-              overlay={
-                <ToolTip>
-                  {createCloseButton()}
-                  <ToolTipAudio>
-                    <source
-                      src={generateDownloadURL(fileItem.path)}
-                      type={fileItem.mime}
-                    />
-                  </ToolTipAudio>
-                </ToolTip>
-              }
-            >
-              <TableColNameIconTogglePopover
-                className="fas fa-play"
-                id={`${fileItem.name}-manual-preview`}
-                onClick={() => {
-                  togglePreview();
-                  setTimeout(() => {
-                    const element = document.querySelector('audio');
-                    if (element) {
-                      element.play();
+            {VALID_HTML5_AUDIO_EXTENSIONS.includes(fileItem.extension) && (
+                <OverlayTrigger
+                    placement="right-end"
+                    trigger="click"
+                    overlay={
+                      <ToolTip>
+                        {createCloseButton()}
+                        <ToolTipAudio>
+                          <source
+                              src={generateDownloadURL(fileItem.path)}
+                              type={fileItem.mime}
+                          />
+                        </ToolTipAudio>
+                      </ToolTip>
                     }
-                  }, 500);
-                }}
-              />
-            </OverlayTrigger>
+                >
+                  <TableColNameIconTogglePopover
+                      className="fas fa-play"
+                      id={`${fileItem.name}-manual-preview`}
+                      onClick={() => {
+                        togglePreview();
+                        setTimeout(() => {
+                          const element = document.querySelector('audio');
+                          if (element) {
+                            element.play();
+                          }
+                        }, 500);
+                      }}
+                  />
+                </OverlayTrigger>
+            )}
           </TableColNameAlign>
         </>
       </TableColName>
@@ -316,35 +334,37 @@ const TableColNameComponent: React.FC<{
             <TableColNameAlign>{fileItem.name}</TableColNameAlign>
           </Link>
           <TableColNameAlign>
-            <OverlayTrigger
-              placement="right-end"
-              trigger="click"
-              overlay={
-                <ToolTip>
-                  {createCloseButton()}
-                  <ToolTipVideo>
-                    <source
-                      src={generateDownloadURL(fileItem.path)}
-                      type={fileItem.mime}
-                    />
-                  </ToolTipVideo>
-                </ToolTip>
-              }
-            >
-              <TableColNameIconTogglePopover
-                className="fas fa-play"
-                id={`${fileItem.name}-manual-preview`}
-                onClick={() => {
-                  togglePreview();
-                  setTimeout(() => {
-                    const element = document.querySelector('video');
-                    if (element) {
-                      element.play();
+            {VALID_HTML5_VIDEO_EXTENSIONS.includes(fileItem.extension) && (
+                <OverlayTrigger
+                    placement="right-end"
+                    trigger="click"
+                    overlay={
+                      <ToolTip>
+                        {createCloseButton()}
+                        <ToolTipVideo>
+                          <source
+                              src={generateDownloadURL(fileItem.path)}
+                              type={fileItem.mime}
+                          />
+                        </ToolTipVideo>
+                      </ToolTip>
                     }
-                  }, 500);
-                }}
-              />
-            </OverlayTrigger>
+                >
+                  <TableColNameIconTogglePopover
+                      className="fas fa-play"
+                      id={`${fileItem.name}-manual-preview`}
+                      onClick={() => {
+                        togglePreview();
+                        setTimeout(() => {
+                          const element = document.querySelector('video');
+                          if (element) {
+                            element.play();
+                          }
+                        }, 500);
+                      }}
+                  />
+                </OverlayTrigger>
+            )}
           </TableColNameAlign>
         </>
       </TableColName>
