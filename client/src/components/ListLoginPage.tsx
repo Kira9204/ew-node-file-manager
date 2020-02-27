@@ -71,6 +71,7 @@ const ListLoginPage: React.FC<{
               }}
               isInvalid={username.length === 0}
               isValid={username.length > 0}
+              data-lpignore="true"
             />
           </Form.Group>
         </Form.Row>
@@ -86,6 +87,7 @@ const ListLoginPage: React.FC<{
               }}
               isInvalid={password.length === 0}
               isValid={password.length > 0}
+              data-lpignore="true"
             />
           </Form.Group>
         </Form.Row>

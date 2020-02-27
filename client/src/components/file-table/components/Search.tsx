@@ -39,6 +39,7 @@ const Search: React.FC<Props> = ({ searchContains, setSearchContains }) => {
         height: '28px',
         marginTop: '4px'
       }}
+      data-lpignore="true"
     />
     </Container>
   );
