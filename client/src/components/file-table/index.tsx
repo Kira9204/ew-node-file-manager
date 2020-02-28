@@ -27,21 +27,23 @@ import TableColNameComponent from './components/cols/TableColNameComponent';
 import LocationSegment from './components/table-head/LocationSegment';
 import LocationOneUp from './components/table-head/LocationOneUp';
 import DiskStatsTable from './components/DiskStatsTable';
-import { generateZIPDownloadURL } from '../../service';
+import {generateZIPDownloadURL, getAuthForPath} from '../../service';
 import TableHeadFilesSelect from './components/table-head/TableHeadFilesSelect';
 import LocationLocked from './components/table-head/LocationLocked';
 import LocationLockedClear from './components/table-head/LocationLockedClear';
 import DialogUploadFile from './components/dialogs/DialogUploadFile';
 import DialogDeleteFile from './components/dialogs/DialogDeleteFiles';
-import { SETTING_SHOW_MODIFY_BUTTONS } from '../../constants';
+import {LOCATION_LOGIN_MODIFY_KEY, SETTING_SHOW_MODIFY_BUTTONS} from '../../constants';
 import Search from './components/Search';
 import { useRootReducerProvider } from '../../index';
+import LoginTableFileModify from "./components/LoginTableFileModify";
 
 export const manualPreviewState: Map<string, boolean> = new Map();
 const FileTable: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();
   const { pathData } = state;
   const location = state.fsLocation;
+  const foundModifyAuth = getAuthForPath(location, false, LOCATION_LOGIN_MODIFY_KEY);
   const {
     filePathIsReady,
     filesData,
@@ -239,7 +241,7 @@ const FileTable: React.FC = () => {
             {selectedFiles.length > 0 ? ` (${selectedFiles.length})` : ''}
           </TableSelectedDownloadButton>
         </LinkWhite>
-        {SETTING_SHOW_MODIFY_BUTTONS && (
+        {SETTING_SHOW_MODIFY_BUTTONS && foundModifyAuth && (
           <>
             <DialogUploadFile />
             <DialogDeleteFile setSelectedFiles={setSelectedFiles} />
@@ -247,6 +249,7 @@ const FileTable: React.FC = () => {
         )}
       </CenterDiv>
       <DiskStatsTable pathData={pathData!} />
+      <LoginTableFileModify />
     </div>
   );
 };

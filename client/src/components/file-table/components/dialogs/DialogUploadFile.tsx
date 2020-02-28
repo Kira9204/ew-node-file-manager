@@ -5,9 +5,10 @@ import { ACTION_TYPES } from '../../../../reducer';
 import { Col, Form, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
 import axios, { AxiosError } from 'axios';
-import { generateUploadURL, loadPathData } from '../../../../service';
+import {generateUploadURL, getAuthForPath, loadPathData} from '../../../../service';
 import Button from 'react-bootstrap/Button';
 import Progressbar from 'react-bootstrap/ProgressBar';
+import {LOCATION_LOGIN_MODIFY_KEY} from "../../../../constants";
 
 const StyledModal = styled(Modal)`
   &&& {
@@ -44,8 +45,7 @@ const UploadButton = styled(Button).attrs({
 const DialogUploadFile: React.FC = () => {
   const { state, dispatch } = useRootReducerProvider();
   const newFolderName = state.uploadDialog.newFolderName;
-  const userName = state.uploadDialog.userName;
-  const password = state.uploadDialog.password;
+  const location = state.fsLocation;
 
   return (
     <>
@@ -111,43 +111,6 @@ const DialogUploadFile: React.FC = () => {
             </Form.Row>
             <Form.Row>
               <Form.Group as={Col}>
-                <Form.Control
-                  id="loginUsername"
-                  type="text"
-                  placeholder="Username"
-                  value={userName}
-                  onChange={(e: any) => {
-                    dispatch({
-                      type: ACTION_TYPES.SET_UPLOAD_DIALOG_USERNAME,
-                      payload: e.target.value
-                    });
-                  }}
-                  isInvalid={userName.length === 0}
-                  isValid={userName.length > 0}
-                />
-              </Form.Group>
-            </Form.Row>
-            <Form.Row>
-              <Form.Group as={Col}>
-                <Form.Control
-                  id="loginPassword"
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e: any) => {
-                    dispatch({
-                      type: ACTION_TYPES.SET_UPLOAD_DIALOG_PASSWORD,
-                      payload: e.target.value
-                    });
-                  }}
-                  isInvalid={password.length === 0}
-                  isValid={password.length > 0}
-                />
-              </Form.Group>
-            </Form.Row>
-
-            <Form.Row>
-              <Form.Group as={Col}>
                 <StyledProgressbar
                   style={{ width: '100%', height: '30px' }}
                   now={state.uploadDialog.uploadPercent}
@@ -158,18 +121,15 @@ const DialogUploadFile: React.FC = () => {
 
             <UploadButton
               onClick={() => {
-                if (
-                  !state.uploadDialog.selectedFiles ||
-                  userName.length === 0 ||
-                  password.length === 0
-                ) {
-                  return;
-                }
+                  const foundModifyAuth = getAuthForPath(location, false, LOCATION_LOGIN_MODIFY_KEY);
+                  if (!foundModifyAuth || !state.uploadDialog.selectedFiles) {
+                      return;
+                  }
+
                 const config = {
-                  auth: {
-                    username: userName,
-                    password
-                  },
+                    headers: {
+                        Authorization: 'Basic ' + foundModifyAuth.auth
+                    },
                   onUploadProgress: (progressEvent: any) => {
                     const percentCompleted = Math.round(
                       (progressEvent.loaded * 100) / progressEvent.total

@@ -6,7 +6,8 @@ import {
   downloadGenerateZip,
   generateFilePreview,
   getPathInfo,
-  uploadFile
+  uploadFile,
+  verifyLoginCredentials
 } from '../services/FileManager';
 
 const router = express.Router();
@@ -27,6 +28,9 @@ router.get('/zip/*', (req, res) => {
   return downloadGenerateZip(req, res);
 });
 
+router.post('/login', (req, res) => {
+  return verifyLoginCredentials(req, res);
+});
 router.post('/upload', (req, res) => {
   return uploadFile(req, res);
 });

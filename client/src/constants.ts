@@ -6,10 +6,11 @@ export const BASE_URL = 'http://localhost:3001';
 
 export const API_URL = BASE_URL + '/api';
 export const LOCATION_LOGIN_KEY = 'location_login_storage';
+export const LOCATION_LOGIN_MODIFY_KEY = 'location_login_modify_storage';
 
 // Enable this setting if you want the option to store the username/password
 // as a global '/' path by default
 export const SETTING_CHECK_PASS_GLOBAL = true;
 export const SETTING_SHOW_MODIFY_BUTTONS = true;
 export const TITLE_STR = '$D3FF file explorer';
-export const VERSION = '1.0 2020-02-27';
+export const VERSION = '1.1-beta1 2020-02-29';

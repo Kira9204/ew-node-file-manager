@@ -6,6 +6,7 @@ import {
   API_URL,
   BASE_URL,
   LOCATION_LOGIN_KEY,
+  LOCATION_LOGIN_MODIFY_KEY,
   SETTING_CHECK_PASS_GLOBAL
 } from './constants';
 
@@ -17,10 +18,8 @@ export interface StoredAuth {
 /**
  * If the user has keys in old or invalid formats they need to re-create the keys.
  */
-export const authCleanUp = () => {
-  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
-    ? localStorage.getItem(LOCATION_LOGIN_KEY)
-    : '[]';
+export const authCleanUp = (key: string = LOCATION_LOGIN_KEY) => {
+  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
   const storedArr: StoredAuth[] = JSON.parse('' + stored);
   if (storedArr.length === 0) {
     return false;
@@ -36,7 +35,7 @@ export const authCleanUp = () => {
   }
 
   if (hasInvalid) {
-    localStorage.removeItem(LOCATION_LOGIN_KEY);
+    localStorage.removeItem(key);
     return true;
   }
   return false;
@@ -47,21 +46,21 @@ export const authCleanUp = () => {
  * @param location
  * @param username
  * @param password
+ * @param key
  */
 export const authStoreNew = (
   location: string,
   username: string,
-  password: string
+  password: string,
+  key: string = LOCATION_LOGIN_KEY
 ) => {
   const storeObj = { location, auth: window.btoa(username + ':' + password) };
-  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
-    ? localStorage.getItem(LOCATION_LOGIN_KEY)
-    : '[]';
+  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
   const storedArr: StoredAuth[] = JSON.parse('' + stored);
   const storedArrFiltered = storedArr.filter((e) => e.location !== location);
 
   storedArrFiltered.push(storeObj);
-  localStorage.setItem(LOCATION_LOGIN_KEY, JSON.stringify(storedArrFiltered));
+  localStorage.setItem(key, JSON.stringify(storedArrFiltered));
 
   return storedArrFiltered;
 };
@@ -69,18 +68,22 @@ export const authStoreNew = (
 /**
  * Removes a location from the auth arr
  * @param location
+ * @param key
+ * @param ignoreCheckPassGlobal
  */
-export const removeAuthForLocation = (location: string) => {
-  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
-    ? localStorage.getItem(LOCATION_LOGIN_KEY)
-    : '[]';
+export const removeAuthForLocation = (
+  location: string,
+  ignoreCheckPassGlobal: boolean = false,
+  key: string = LOCATION_LOGIN_KEY
+) => {
+  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
   const storedArr: StoredAuth[] = JSON.parse('' + stored);
   let filteredAuth = storedArr.filter((e) => e.location !== location);
-  if (SETTING_CHECK_PASS_GLOBAL) {
+  if (SETTING_CHECK_PASS_GLOBAL && !ignoreCheckPassGlobal) {
     filteredAuth = filteredAuth.filter((e) => e.location !== '/');
   }
 
-  localStorage.setItem(LOCATION_LOGIN_KEY, JSON.stringify(filteredAuth));
+  localStorage.setItem(key, JSON.stringify(filteredAuth));
   return filteredAuth;
 };
 
@@ -90,18 +93,18 @@ export const removeAuthForLocation = (location: string) => {
  * And paths tends to be '/asd/d', we will also try the fist entry we find
  * @param location A URI path.
  * @param ignorePath If the path isn't found, try whatever is in the store.
+ * @param key
  */
 export const getAuthForPath = (
   location: string,
-  ignorePath: boolean = false
+  ignorePath: boolean = false,
+  key: string = LOCATION_LOGIN_KEY
 ) => {
   if (authCleanUp()) {
     return null;
   }
 
-  const stored = localStorage.getItem(LOCATION_LOGIN_KEY)
-    ? localStorage.getItem(LOCATION_LOGIN_KEY)
-    : '[]';
+  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
   const storedArr: StoredAuth[] = JSON.parse('' + stored);
   const found = storedArr.find((e) => location.startsWith(e.location));
   if (found) {
@@ -158,6 +161,33 @@ export const loadPathData = (
             ? err.response.statusText
             : 'Could not connect to server!'
         }
+      });
+    });
+};
+
+export const authModifyTestAndStoreNew = (
+  filePath: string,
+  username: string,
+  password: string,
+  dispatch: (obj: DispatchAction) => void
+) => {
+  axios
+    .post(generateAuthModifyLoginTestURL(), {
+      location: filePath,
+      username: username,
+      password: password
+    })
+    .then((res) => {
+      dispatch({
+        type: ACTION_TYPES.SET_TEST_MODIFY_AUTH_RESET
+      });
+      authStoreNew(filePath, username, password, LOCATION_LOGIN_MODIFY_KEY);
+      loadPathData(filePath, dispatch);
+    })
+    .catch((err: AxiosError) => {
+      dispatch({
+        type: ACTION_TYPES.SET_TEST_MODIFY_AUTH_SHOW_LOGIN_ERROR,
+        payload: true
       });
     });
 };
@@ -232,4 +262,8 @@ export const generateDeleteURL = (location: string, fileNames: string[]) => {
   }
 
   return newUrl;
+};
+
+export const generateAuthModifyLoginTestURL = () => {
+  return API_URL + cleanUrl('/login');
 };

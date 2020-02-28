@@ -4,8 +4,9 @@ import { ACTION_TYPES } from '../../../../reducer';
 import { Col, Form, Modal } from 'react-bootstrap';
 import styled from 'styled-components';
 import axios, { AxiosError } from 'axios';
-import { generateDeleteURL, loadPathData } from '../../../../service';
+import {generateDeleteURL, getAuthForPath, loadPathData} from '../../../../service';
 import Button from 'react-bootstrap/Button';
+import {LOCATION_LOGIN_MODIFY_KEY} from "../../../../constants";
 
 const StyledModal = styled(Modal)`
   &&& {
@@ -45,8 +46,7 @@ const DialogDeleteFile: React.FC<{
 }> = ({ setSelectedFiles }) => {
   const { state, dispatch } = useRootReducerProvider();
   const selectedFiles = state.fileTable.selectedFiles;
-  const userName = state.deleteDialog.userName;
-  const password = state.deleteDialog.password;
+  const location = state.fsLocation;
 
   return (
     <>
@@ -91,57 +91,19 @@ const DialogDeleteFile: React.FC<{
               </ul>
             </Form.Row>
             <Form.Row>
-              <p>Provide a username and password to continue</p>
+              <p>Proceed by confirming this request</p>
             </Form.Row>
-
-            <Form.Row>
-              <Form.Group as={Col}>
-                <Form.Control
-                  id="loginUsername"
-                  type="text"
-                  placeholder="Username"
-                  value={userName}
-                  onChange={(e: any) => {
-                    dispatch({
-                      type: ACTION_TYPES.SET_DELETE_DIALOG_USERNAME,
-                      payload: e.target.value
-                    });
-                  }}
-                  isInvalid={userName.length === 0}
-                  isValid={userName.length > 0}
-                />
-              </Form.Group>
-            </Form.Row>
-            <Form.Row>
-              <Form.Group as={Col}>
-                <Form.Control
-                  id="loginPassword"
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e: any) => {
-                    dispatch({
-                      type: ACTION_TYPES.SET_DELETE_DIALOG_PASSWORD,
-                      payload: e.target.value
-                    });
-                  }}
-                  isInvalid={password.length === 0}
-                  isValid={password.length > 0}
-                />
-              </Form.Group>
-            </Form.Row>
-
             <DeleteButton
               onClick={() => {
-                if (userName.length === 0 || password.length === 0) {
-                  return;
-                }
+                  const foundModifyAuth = getAuthForPath(location, false, LOCATION_LOGIN_MODIFY_KEY);
+                  if (!foundModifyAuth) {
+                      return;
+                  }
                 axios
                   .delete(generateDeleteURL(state.fsLocation, selectedFiles), {
-                    auth: {
-                      username: userName,
-                      password
-                    }
+                      headers: {
+                          Authorization: 'Basic ' + foundModifyAuth.auth
+                      },
                   })
                   .then((res) => {
                     loadPathData(state.fsLocation, dispatch);

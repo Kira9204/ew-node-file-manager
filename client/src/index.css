@@ -16,6 +16,10 @@ html, body, #root
     background-color: #161c2d !important;
 }
 
+.table td {
+    vertical-align: middle !important;
+}
+
 
 /** File upload styles */
 .files input {

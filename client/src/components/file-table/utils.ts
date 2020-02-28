@@ -4,7 +4,7 @@ import { FileStatInfo } from '../../reducer';
 import path from 'path';
 
 export const formatFileSize = (size: number) => {
-  return fileSize(size, { base: 10, round: 2 });
+  return fileSize(size, { base: 10, round: 2 }).toUpperCase();
 };
 export const formatMTime = (mTimeUnix: number) => {
   const date = new Date(mTimeUnix);
@@ -51,6 +51,7 @@ export const getFAIcon = (
     case 'DOC':
     case 'DOCX':
     case 'ODT':
+    case 'RTF':
       return 'far fa-file-word';
     case 'PPT':
     case 'PPTX':

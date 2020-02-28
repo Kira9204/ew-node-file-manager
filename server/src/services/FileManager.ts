@@ -134,7 +134,7 @@ const basicAuthFileModify = (
   location: string
 ) => {
   if (!AUTH_MODIFY || AUTH_MODIFY.length === 0) {
-    return true;
+    return false;
   }
 
   const cleanLocation = authCleanLocationString(location);
@@ -146,7 +146,7 @@ const basicAuthFileModify = (
     );
   });
   if (!foundAuth) {
-    return true;
+    return false;
   }
   return verifyLoginAgainstHeaders(req, res, foundAuth);
 };
@@ -548,7 +548,10 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
     const filesStats: FileStatInfo[] = [];
 
     fileNames.forEach((fileName) => {
-      if (SETTING_IGNORE_NAMES.includes(fileName)) {
+      if (
+        SETTING_IGNORE_NAMES.includes(fileName) ||
+        fileName.charAt(0) === '.'
+      ) {
         return;
       }
 
@@ -573,7 +576,7 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
       .send();
   } else if (fileStat.isFile()) {
     const fileName = path.basename(fsPath);
-    if (SETTING_IGNORE_NAMES.includes(fileName)) {
+    if (SETTING_IGNORE_NAMES.includes(fileName) || fileName.charAt(0) === '.') {
       return res
         .json(
           formatResponse({
@@ -740,6 +743,66 @@ const removeTmpFiles = (filesObj: undefined | fileUpload.FileArray) => {
     // @ts-ignore
     fs.unlink(filesObj[key].tempFilePath, dummyFunction);
   });
+};
+
+export const verifyLoginCredentials = (
+  req: express.Request,
+  res: express.Response
+) => {
+  const body = req.body;
+  const requestPath = '/' + (body.location ? body.location : '');
+
+  if (!body.username || body.username.length === 0) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'No username provided' })
+      .send();
+  } else if (!body.password || body.password.length === 0) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'No password provided' })
+      .send();
+  }
+
+  if (!AUTH_MODIFY || AUTH_MODIFY.length === 0) {
+    return res
+      .status(401)
+      .json({
+        status: 401,
+        message: 'File modification is disabled on this server'
+      })
+      .send();
+  }
+
+  const cleanLocation = authCleanLocationString(requestPath);
+  let foundAuth = AUTH_MODIFY.find((e) => {
+    return (
+      cleanLocation.startsWith('/' + authCleanLocationString(e.path)) ||
+      e.path === '' ||
+      e.path === '/'
+    );
+  });
+  if (!foundAuth) {
+    return res
+      .status(401)
+      .json({ status: 401, message: 'No modify permission on path' })
+      .send();
+  }
+
+  if (
+    foundAuth.user.toLowerCase() === body.username.toLowerCase() &&
+    foundAuth.password === body.password
+  ) {
+    return res
+      .status(200)
+      .json({ status: 200, message: 'Valid login' })
+      .send();
+  }
+
+  return res
+    .status(401)
+    .json({ status: 401, message: 'Invalid login' })
+    .send();
 };
 
 export const uploadFile = (req: express.Request, res: express.Response) => {

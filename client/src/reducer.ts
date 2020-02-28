@@ -34,15 +34,11 @@ export interface ApplicationState {
     statusCode: number;
     statusMessage: string;
     newFolderName: string;
-    userName: string;
-    password: string;
   };
   deleteDialog: {
     isOpen: boolean;
     statusCode: number;
     statusMessage: string;
-    userName: string;
-    password: string;
   };
   fileTable: {
     filesData: null | FileStatInfo[];
@@ -51,6 +47,11 @@ export interface ApplicationState {
     previewFileName: string;
     selectedFiles: string[];
     searchContains: string;
+  };
+  loginModifyTest: {
+    username: string;
+    password: string;
+    showLoginError: boolean;
   };
 }
 
@@ -70,16 +71,12 @@ export const initialApplicationState: ApplicationState = {
     uploadPercent: 0,
     statusCode: 0,
     statusMessage: '',
-    newFolderName: '',
-    userName: '',
-    password: ''
+    newFolderName: ''
   },
   deleteDialog: {
     isOpen: false,
     statusCode: 0,
-    statusMessage: '',
-    userName: '',
-    password: ''
+    statusMessage: ''
   },
   fileTable: {
     filesData: null,
@@ -88,6 +85,11 @@ export const initialApplicationState: ApplicationState = {
     previewFileName: '',
     selectedFiles: [],
     searchContains: ''
+  },
+  loginModifyTest: {
+    username: '',
+    password: '',
+    showLoginError: false
   }
 };
 
@@ -116,15 +118,16 @@ export const ACTION_TYPES = {
   SET_UPLOAD_DIALOG_FILES: 'SET_UPLOAD_DIALOG_FILES',
   SET_UPLOAD_DIALOG_PERCENT: 'SET_UPLOAD_DIALOG_PERCENT',
   SET_UPLOAD_DIALOG_NEW_FOLDER: 'SET_UPLOAD_DIALOG_NEW_FOLDER',
-  SET_UPLOAD_DIALOG_USERNAME: 'SET_UPLOAD_DIALOG_USERNAME',
-  SET_UPLOAD_DIALOG_PASSWORD: 'SET_UPLOAD_DIALOG_PASSWORD',
   SET_UPLOAD_DIALOG_ERROR: 'SET_UPLOAD_DIALOG_ERROR',
   CLOSE_UPLOAD_DIALOG: 'CLOSE_UPLOAD_DIALOG',
   OPEN_DELETE_DIALOG: 'OPEN_DELETE_DIALOG',
-  SET_DELETE_DIALOG_USERNAME: 'SET_DELETE_DIALOG_USERNAME',
-  SET_DELETE_DIALOG_PASSWORD: 'SET_DELETE_DIALOG_PASSWORD',
   SET_DELETE_DIALOG_ERROR: 'SET_DELETE_DIALOG_ERROR',
-  CLOSE_DELETE_DIALOG: 'CLOSE_DELETE_DIALOG'
+  CLOSE_DELETE_DIALOG: 'CLOSE_DELETE_DIALOG',
+  SET_TEST_MODIFY_AUTH_USERNAME: 'SET_TEST_MODIFY_AUTH_USERNAME',
+  SET_TEST_MODIFY_AUTH_PASSWORD: 'SET_TEST_MODIFY_AUTH_PASSWORD',
+  SET_TEST_MODIFY_AUTH_SHOW_LOGIN_ERROR:
+    'SET_TEST_MODIFY_AUTH_SHOW_LOGIN_ERROR',
+  SET_TEST_MODIFY_AUTH_RESET: 'SET_TEST_MODIFY_AUTH_RESET'
 };
 
 export const reducer = (state: ApplicationState, action: DispatchAction) => {
@@ -201,9 +204,7 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           selectedFiles: null,
           uploadPercent: 0,
           statusCode: 0,
-          statusMessage: '',
-          userName: '',
-          password: ''
+          statusMessage: ''
         }
       };
     case ACTION_TYPES.SET_UPLOAD_DIALOG_FILES:
@@ -231,22 +232,6 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           newFolderName: action.payload
         }
       };
-    case ACTION_TYPES.SET_UPLOAD_DIALOG_USERNAME:
-      return {
-        ...state,
-        uploadDialog: {
-          ...state.uploadDialog,
-          userName: action.payload
-        }
-      };
-    case ACTION_TYPES.SET_UPLOAD_DIALOG_PASSWORD:
-      return {
-        ...state,
-        uploadDialog: {
-          ...state.uploadDialog,
-          password: action.payload
-        }
-      };
     case ACTION_TYPES.SET_UPLOAD_DIALOG_ERROR:
       return {
         ...state,
@@ -266,9 +251,7 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           uploadPercent: 0,
           statusCode: 0,
           statusMessage: '',
-          newFolderName: '',
-          userName: '',
-          password: ''
+          newFolderName: ''
         }
       };
     case ACTION_TYPES.OPEN_DELETE_DIALOG:
@@ -279,9 +262,7 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           isOpen: true,
           uploadPercent: 0,
           statusCode: 0,
-          statusMessage: '',
-          userName: '',
-          password: ''
+          statusMessage: ''
         }
       };
     case ACTION_TYPES.SET_DELETE_DIALOG_ERROR:
@@ -293,22 +274,6 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           statusMessage: action.payload.statusMessage
         }
       };
-    case ACTION_TYPES.SET_DELETE_DIALOG_USERNAME:
-      return {
-        ...state,
-        deleteDialog: {
-          ...state.deleteDialog,
-          userName: action.payload
-        }
-      };
-    case ACTION_TYPES.SET_DELETE_DIALOG_PASSWORD:
-      return {
-        ...state,
-        deleteDialog: {
-          ...state.deleteDialog,
-          password: action.payload
-        }
-      };
     case ACTION_TYPES.CLOSE_DELETE_DIALOG:
       return {
         ...state,
@@ -316,9 +281,44 @@ export const reducer = (state: ApplicationState, action: DispatchAction) => {
           isOpen: false,
           uploadPercent: 0,
           statusCode: 0,
-          statusMessage: '',
-          userName: '',
-          password: ''
+          statusMessage: ''
+        }
+      };
+
+    case ACTION_TYPES.SET_TEST_MODIFY_AUTH_USERNAME:
+      return {
+        ...state,
+        loginModifyTest: {
+          ...state.loginModifyTest,
+          username: action.payload
+        }
+      };
+
+    case ACTION_TYPES.SET_TEST_MODIFY_AUTH_PASSWORD:
+      return {
+        ...state,
+        loginModifyTest: {
+          ...state.loginModifyTest,
+          password: action.payload
+        }
+      };
+
+    case ACTION_TYPES.SET_TEST_MODIFY_AUTH_SHOW_LOGIN_ERROR:
+      return {
+        ...state,
+        loginModifyTest: {
+          ...state.loginModifyTest,
+          showLoginError: action.payload
+        }
+      };
+
+    case ACTION_TYPES.SET_TEST_MODIFY_AUTH_RESET:
+      return {
+        ...state,
+        loginModifyTest: {
+          username: '',
+          password: '',
+          showLoginError: false
         }
       };
     default:
