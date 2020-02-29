@@ -255,7 +255,7 @@ const isImage = (fileName: string) => {
  * @param fileName
  */
 export const isText = (fileName: string) => {
-  if (['.pdf', '.cf', '.service'].includes(path.extname(fileName))) {
+  if (['.pdf', '.cf', '.service', '.sh', '.bash'].includes(path.extname(fileName))) {
     return true;
   }
 

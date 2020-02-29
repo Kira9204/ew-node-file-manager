@@ -95,6 +95,8 @@ export const getFAIcon = (
     case 'GO':
     case 'JSON':
     case 'XML':
+    case 'SH':
+    case 'BASH':
       return 'far fa-file-code';
     case 'ISO':
     case 'BIN':
@@ -122,7 +124,7 @@ export const isImage = (fileName: string) => {
   return res.startsWith('image/');
 };
 export const isText = (fileName: string) => {
-  if (['.pdf', '.cf', '.service'].includes(path.extname(fileName))) {
+  if (['.pdf', '.cf', '.service', '.sh', '.bash'].includes(path.extname(fileName))) {
     return true;
   }
 
