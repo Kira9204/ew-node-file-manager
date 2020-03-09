@@ -109,6 +109,8 @@ const LoginForm: React.FC = () => {
           <td>
               Notice: logins are valid per-location downwards
           </td>
+          <td></td>
+          <td></td>
       </tr>
       </tbody>
     </LoginEl>
