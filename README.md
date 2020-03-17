@@ -6,3 +6,6 @@ Run "npm run build" to build the javascript files from typescript.
 
 Recommended aproach when developing is to run "npm run dev" from this folder.
 This will activate both the node.js backend as well as the react-create-app front-end.
+
+Screenshot:  
+![](https://raw.githubusercontent.com/Kira9204/ew-node-file-manager/develop/screenshot.png)
