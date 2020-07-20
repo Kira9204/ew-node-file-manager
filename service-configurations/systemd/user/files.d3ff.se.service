@@ -1,0 +1,13 @@
+[Unit]
+Description=files.d3ff.se website
+
+[Service]
+Environment=PORT=3001
+WorkingDirectory=/home/erik/servers/websites/files.d3ff.se/ew-node-file-manager/
+ExecStart=/usr/bin/node server/www.js >/dev/null 2>&1
+Restart=always
+RestartSec=1000ms
+StartLimitInterval=0
+
+[Install]
+WantedBy=default.target

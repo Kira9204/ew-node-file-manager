@@ -99,9 +99,6 @@ const ListLoginPage: React.FC<{
               style={{ zoom: '1.2' }}
               checked={isStoreAsGlobal}
               onClick={() => {
-                if (SETTING_CHECK_PASS_GLOBAL) {
-                  return;
-                }
                 setIsStoreAsGlobal(!isStoreAsGlobal);
               }}
             />

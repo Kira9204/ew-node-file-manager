@@ -1,11 +1,11 @@
 [Unit]
-Description=NodeJs Website
+Description=files.d3ff.se website
 After=network.target
 
 [Service]
 Environment=PORT=3001
 User=erik
-WorkingDirectory=/home/erik/node-servers/files.d3ff.se
+WorkingDirectory=/home/erik/servers/websites/files.d3ff.se/ew-node-file-manager/
 ExecStart=/usr/bin/node server/www.js >/dev/null 2>&1
 Restart=always
 RestartSec=1000ms
