@@ -100,6 +100,14 @@ const authCleanLocationString = (str: string) => {
 
   return cleanPath;
 };
+
+const sortAuthArrByPathDesc = (arr: AUTH_DIR[]): AUTH_DIR[] => {
+  return arr.sort(function(a, b) {
+    // ASC  -> a.length - b.length
+    // DESC -> b.length - a.length
+    return b.path.length - a.path.length;
+  });
+};
 /**
  * If this path is protected by BASIC AUTH, make sure that the client is authenticated against a set of paths+usernames+passwords
  * @param req: The express request
@@ -111,11 +119,11 @@ const basicAuthFileStat = (
   res: express.Response,
   location: string
 ) => {
-  if (!AUTH_FILESTATS || AUTH_FILESTATS.length === 0) {
+  if (AUTH_FILESTATS.length === 0) {
     return true;
   }
   const cleanLocation = authCleanLocationString(location);
-  let foundAuth = AUTH_FILESTATS.find((e) => {
+  let foundAuth = sortAuthArrByPathDesc(AUTH_FILESTATS).find((e) => {
     return (
       cleanLocation.startsWith(authCleanLocationString(e.path)) ||
       e.path === '' ||
@@ -133,12 +141,12 @@ const basicAuthFileModify = (
   res: express.Response,
   location: string
 ) => {
-  if (!AUTH_MODIFY || AUTH_MODIFY.length === 0) {
+  if (AUTH_MODIFY.length === 0) {
     return false;
   }
 
   const cleanLocation = authCleanLocationString(location);
-  let foundAuth = AUTH_MODIFY.find((e) => {
+  let foundAuth = sortAuthArrByPathDesc(AUTH_MODIFY).find((e) => {
     return (
       cleanLocation.startsWith(authCleanLocationString(e.path)) ||
       e.path === '' ||
@@ -255,7 +263,9 @@ const isImage = (fileName: string) => {
  * @param fileName
  */
 export const isText = (fileName: string) => {
-  if (['.pdf', '.cf', '.service', '.sh', '.bash'].includes(path.extname(fileName))) {
+  if (
+    ['.pdf', '.cf', '.service', '.sh', '.bash'].includes(path.extname(fileName))
+  ) {
     return true;
   }
 
@@ -474,8 +484,7 @@ export const getPathInfo = (req: express.Request, res: express.Response) => {
       .send();
   }
   if (
-    AUTH_FILESTATS &&
-    AUTH_FILESTATS.length > 0 &&
+    AUTH_FILESTATS.length !== 0 &&
     !basicAuthFileStat(req, res, requestPath)
   ) {
     return res
@@ -764,7 +773,7 @@ export const verifyLoginCredentials = (
       .send();
   }
 
-  if (!AUTH_MODIFY || AUTH_MODIFY.length === 0) {
+  if (AUTH_MODIFY.length === 0) {
     return res
       .status(401)
       .json({
@@ -775,7 +784,7 @@ export const verifyLoginCredentials = (
   }
 
   const cleanLocation = authCleanLocationString(requestPath);
-  let foundAuth = AUTH_MODIFY.find((e) => {
+  let foundAuth = sortAuthArrByPathDesc(AUTH_MODIFY).find((e) => {
     return (
       cleanLocation.startsWith('/' + authCleanLocationString(e.path)) ||
       e.path === '' ||

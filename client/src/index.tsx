@@ -5,6 +5,7 @@ import { Router } from 'react-router';
 import { createBrowserHistory } from 'history';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'firacode/distr/fira_code.css'
 import './index.css';
 import { ApplicationState, DispatchAction, initialApplicationState, reducer } from './reducer';
 

@@ -7,13 +7,28 @@ import {
   BASE_URL,
   LOCATION_LOGIN_KEY,
   LOCATION_LOGIN_MODIFY_KEY,
-  SETTING_CHECK_PASS_GLOBAL
+  SETTING_CHECK_PASS_GLOBAL,
+  USE_WEBSERVER
 } from './constants';
 
 export interface StoredAuth {
   location: string;
   auth: string;
 }
+
+/**
+ * Lookup an authentication for this location.
+ * Since the lookup should be from bottom to top, the array is sorted by location before it is returned
+ */
+export const getLocalStorageAuth = (key: string): StoredAuth[] => {
+  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
+  const storedArr: StoredAuth[] = JSON.parse('' + stored);
+  return storedArr.sort(function(a, b) {
+    // ASC  -> a.length - b.length
+    // DESC -> b.length - a.length
+    return b.location.length - a.location.length;
+  });
+};
 
 /**
  * If the user has keys in old or invalid formats they need to re-create the keys.
@@ -55,8 +70,7 @@ export const authStoreNew = (
   key: string = LOCATION_LOGIN_KEY
 ) => {
   const storeObj = { location, auth: window.btoa(username + ':' + password) };
-  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
-  const storedArr: StoredAuth[] = JSON.parse('' + stored);
+  const storedArr = getLocalStorageAuth(key);
   const storedArrFiltered = storedArr.filter((e) => e.location !== location);
 
   storedArrFiltered.push(storeObj);
@@ -76,8 +90,7 @@ export const removeAuthForLocation = (
   ignoreCheckPassGlobal: boolean = false,
   key: string = LOCATION_LOGIN_KEY
 ) => {
-  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
-  const storedArr: StoredAuth[] = JSON.parse('' + stored);
+  const storedArr = getLocalStorageAuth(key);
   let filteredAuth = storedArr.filter((e) => e.location !== location);
   if (SETTING_CHECK_PASS_GLOBAL && !ignoreCheckPassGlobal) {
     filteredAuth = filteredAuth.filter((e) => e.location !== '/');
@@ -104,8 +117,7 @@ export const getAuthForPath = (
     return null;
   }
 
-  const stored = localStorage.getItem(key) ? localStorage.getItem(key) : '[]';
-  const storedArr: StoredAuth[] = JSON.parse('' + stored);
+  const storedArr = getLocalStorageAuth(key);
   const found = storedArr.find((e) => location.startsWith(e.location));
   if (found) {
     return found;
@@ -218,7 +230,10 @@ export const generateDownloadURL = (fileItemPath: string) => {
    * Use the following link for nginx downloads
    *  BASE_URL + cleanUrl('/download/' + fileItemPath);
    */
-  return BASE_URL + cleanUrl(`/download/${fileItemPath}`);
+  if (USE_WEBSERVER) {
+    return BASE_URL + cleanUrl(`/download/${fileItemPath}`);
+  }
+  return API_URL + cleanUrl('/download/' + fileItemPath);
 };
 
 export const generateZIPDownloadURL = (

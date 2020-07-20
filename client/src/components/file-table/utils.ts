@@ -29,11 +29,13 @@ export const getFAIcon = (
   }
   switch (fileExtension) {
     case 'MP4':
+    case 'M4V':
     case 'MKV':
     case 'AVI':
     case 'WEBM':
     case 'MOV':
     case 'OGG':
+    case 'OGV':
     case 'FLV':
     case 'WMV':
       return 'far fa-file-video';
